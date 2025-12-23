@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LoRaLeaf Sensor Network</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -224,6 +225,88 @@
             margin-bottom: 20px;
             font-size: 0.9rem;
         }
+
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .chart-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .barometer-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .barometer-display {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .barometer-gauge {
+            text-align: center;
+        }
+
+        .gauge-value {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .gauge-label {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+
+        .trend-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .trend-arrow {
+            font-size: 2rem;
+        }
+
+        .trend-rising { color: #e74c3c; }
+        .trend-falling { color: #3498db; }
+        .trend-steady { color: #95a5a6; }
+
+        .weather-condition {
+            text-align: center;
+            font-size: 1.3rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -238,6 +321,32 @@
         </div>
 
         <div id="statsSection"></div>
+
+        <!-- Barometer Section -->
+        <div id="barometerSection"></div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="chart-card">
+                <div class="chart-title">Temperature (Last 24 Hours)</div>
+                <div class="chart-container">
+                    <canvas id="tempChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Pressure (Last 24 Hours)</div>
+                <div class="chart-container">
+                    <canvas id="pressureChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Humidity (Last 24 Hours)</div>
+                <div class="chart-container">
+                    <canvas id="humidityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
         <div id="dashboard" class="dashboard">
             <div class="loading">Loading sensor data...</div>
         </div>
@@ -249,8 +358,17 @@
 
     <script>
         const API_URL = '/api/nodes';
+        const HISTORY_API_URL = '/api/history';
         const REFRESH_INTERVAL = 30000; // 30 seconds
         const INACTIVE_THRESHOLD = 300; // 5 minutes in seconds
+
+        // Chart instances
+        let tempChart = null;
+        let pressureChart = null;
+        let humidityChart = null;
+
+        // Historical data for barometer trend
+        let pressureHistory = [];
 
         async function fetchSensorData() {
             try {
@@ -277,6 +395,20 @@
             if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
             if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
             return `${Math.floor(seconds / 86400)}d ago`;
+        }
+
+        async function fetchHistoricalData(hours = 24) {
+            try {
+                const response = await fetch(`${HISTORY_API_URL}?hours=${hours}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                return data.readings;
+            } catch (error) {
+                console.error('Error fetching historical data:', error);
+                return [];
+            }
         }
 
         function calculateAverages(nodes) {
@@ -384,6 +516,168 @@
             `;
         }
 
+        function getWeatherCondition(pressure) {
+            if (pressure < 1000) return 'Stormy';
+            if (pressure < 1010) return 'Rainy';
+            if (pressure < 1020) return 'Cloudy';
+            if (pressure < 1030) return 'Fair';
+            return 'Very Dry';
+        }
+
+        function getPressureTrend(currentPressure) {
+            if (pressureHistory.length < 2) return { trend: 'steady', arrow: '→' };
+
+            const oldPressure = pressureHistory[0];
+            const diff = currentPressure - oldPressure;
+
+            if (diff > 1) return { trend: 'rising', arrow: '↑' };
+            if (diff < -1) return { trend: 'falling', arrow: '↓' };
+            return { trend: 'steady', arrow: '→' };
+        }
+
+        function renderBarometer(avgPressure) {
+            const pressure = parseFloat(avgPressure);
+            const condition = getWeatherCondition(pressure);
+            const trend = getPressureTrend(pressure);
+
+            // Update pressure history (keep last 10 readings)
+            pressureHistory.push(pressure);
+            if (pressureHistory.length > 10) {
+                pressureHistory.shift();
+            }
+
+            return `
+                <div class="barometer-card">
+                    <div class="chart-title">Barometric Pressure</div>
+                    <div class="barometer-display">
+                        <div class="barometer-gauge">
+                            <div class="gauge-value">${avgPressure}</div>
+                            <div class="gauge-label">hPa</div>
+                        </div>
+                        <div class="trend-indicator trend-${trend.trend}">
+                            <span class="trend-arrow">${trend.arrow}</span>
+                            <span>${trend.trend.toUpperCase()}</span>
+                        </div>
+                        <div class="weather-condition">
+                            ${condition}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createOrUpdateChart(chartId, chartInstance, label, data, color) {
+            const ctx = document.getElementById(chartId).getContext('2d');
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: label,
+                        data: data.values,
+                        borderColor: color,
+                        backgroundColor: color + '20',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            display: true,
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function processHistoricalData(readings) {
+            const nodeData = {};
+
+            readings.forEach(reading => {
+                if (!nodeData[reading.node_id]) {
+                    nodeData[reading.node_id] = {
+                        timestamps: [],
+                        temperatures: [],
+                        pressures: [],
+                        humidities: []
+                    };
+                }
+
+                const date = new Date(reading.timestamp);
+                nodeData[reading.node_id].timestamps.push(date.toLocaleTimeString('en-GB', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }));
+                nodeData[reading.node_id].temperatures.push(reading.temperature);
+                nodeData[reading.node_id].pressures.push(reading.pressure);
+                nodeData[reading.node_id].humidities.push(reading.humidity);
+            });
+
+            return nodeData;
+        }
+
+        function updateCharts(readings) {
+            const nodeData = processHistoricalData(readings);
+
+            // Combine all node data
+            const allTimestamps = [];
+            const allTemps = [];
+            const allPressures = [];
+            const allHumidities = [];
+
+            Object.keys(nodeData).forEach(nodeId => {
+                allTimestamps.push(...nodeData[nodeId].timestamps);
+                allTemps.push(...nodeData[nodeId].temperatures);
+                allPressures.push(...nodeData[nodeId].pressures);
+                allHumidities.push(...nodeData[nodeId].humidities);
+            });
+
+            // Sample data to max 50 points for readability
+            const step = Math.max(1, Math.floor(allTimestamps.length / 50));
+            const sampledTimestamps = allTimestamps.filter((_, i) => i % step === 0);
+            const sampledTemps = allTemps.filter((_, i) => i % step === 0);
+            const sampledPressures = allPressures.filter((_, i) => i % step === 0);
+            const sampledHumidities = allHumidities.filter((_, i) => i % step === 0);
+
+            // Update temperature chart
+            tempChart = createOrUpdateChart('tempChart', tempChart, 'Temperature (°C)', {
+                labels: sampledTimestamps,
+                values: sampledTemps
+            }, '#e74c3c');
+
+            // Update pressure chart
+            pressureChart = createOrUpdateChart('pressureChart', pressureChart, 'Pressure (hPa)', {
+                labels: sampledTimestamps,
+                values: sampledPressures
+            }, '#3498db');
+
+            // Update humidity chart
+            humidityChart = createOrUpdateChart('humidityChart', humidityChart, 'Humidity (%)', {
+                labels: sampledTimestamps,
+                values: sampledHumidities
+            }, '#1abc9c');
+        }
+
         async function updateDashboard() {
             try {
                 const nodes = await fetchSensorData();
@@ -391,15 +685,26 @@
                 // Sort nodes by ID
                 nodes.sort((a, b) => a.node_id.localeCompare(b.node_id));
 
+                // Calculate stats
+                const stats = calculateAverages(nodes);
+
                 // Update stats section
                 document.getElementById('statsSection').innerHTML = renderStats(nodes);
+
+                // Update barometer
+                document.getElementById('barometerSection').innerHTML = renderBarometer(stats.avgPressure);
 
                 // Update dashboard
                 const dashboard = document.getElementById('dashboard');
                 dashboard.innerHTML = nodes.map(node => renderNode(node)).join('');
 
                 // Update last refresh time
-                document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString();
+                const now = new Date();
+                document.getElementById('lastRefresh').textContent = now.toLocaleTimeString('en-GB', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                }) + ' (' + now.toLocaleDateString('en-GB') + ')';
 
             } catch (error) {
                 document.getElementById('dashboard').innerHTML = `
@@ -412,11 +717,26 @@
             }
         }
 
+        async function updateChartData() {
+            try {
+                const readings = await fetchHistoricalData(24);
+                if (readings && readings.length > 0) {
+                    updateCharts(readings);
+                }
+            } catch (error) {
+                console.error('Error updating charts:', error);
+            }
+        }
+
         // Initial load
         updateDashboard();
+        updateChartData();
 
-        // Auto-refresh
+        // Auto-refresh dashboard every 30 seconds
         setInterval(updateDashboard, REFRESH_INTERVAL);
+
+        // Refresh charts every 5 minutes (they show 24h data, don't need frequent updates)
+        setInterval(updateChartData, 300000);
     </script>
 </body>
 </html>

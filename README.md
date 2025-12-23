@@ -1,169 +1,260 @@
-# LoRaLeaf Azure Dashboard
+# LoRaLeaf Website
 
-Real-time sensor data dashboard for the LoRaLeaf sensor network, deployed on Azure Static Web Apps.
+Professional single-page marketing website for LoRaLeaf - a LoRa-based environmental monitoring system for agriculture and estates.
 
-## Features
+## Overview
 
-- Real-time sensor data display from Azure Table Storage
-- Auto-refresh every 30 seconds
-- Stats summary with network averages
-- Battery monitoring with visual indicators
-- Active/inactive node status (5-minute timeout)
-- Responsive design
+This is a complete, production-ready website built for **loraleaf.com** and **loraleaf.co.uk**.
 
-## Architecture
+### Features
 
-- **Frontend**: HTML/CSS/JavaScript (vanilla, no frameworks)
-- **Backend**: Azure Functions (Python)
-- **Data Storage**: Azure Table Storage
-- **Hosting**: Azure Static Web Apps
-
-## Setup
-
-### Prerequisites
-
-- Azure subscription
-- Azure Storage Account with Table Storage
-- Azure Static Web App
-
-### Environment Variables
-
-Set the following environment variable in your Azure Static Web App:
-
-```
-AZURE_STORAGE_CONNECTION_STRING=<your_connection_string>
-```
-
-To set this in Azure:
-1. Go to your Static Web App in Azure Portal
-2. Navigate to **Configuration**
-3. Add a new application setting:
-   - Name: `AZURE_STORAGE_CONNECTION_STRING`
-   - Value: Your Azure Storage connection string
-
-### Deployment
-
-This project uses GitHub Actions for automatic deployment. When you push to the `main` branch, the app will automatically deploy to Azure Static Web Apps.
-
-#### Setup GitHub Secret
-
-1. Go to your GitHub repository settings
-2. Navigate to **Secrets and variables** → **Actions**
-3. Add a new repository secret:
-   - Name: `AZURE_STATIC_WEB_APPS_API_TOKEN`
-   - Value: Your Azure Static Web App deployment token
-
-To get the deployment token:
-```bash
-az staticwebapp secrets list --name loraleaf --resource-group loraleaf-rg --query "properties.apiKey" -o tsv
-```
+- ✅ Fully responsive single-page design
+- ✅ Modern, clean UI with green/agricultural theme
+- ✅ Real sensor data integration (dashboard preview)
+- ✅ Contact form ready
+- ✅ SEO optimized
+- ✅ Fast loading, minimal dependencies
+- ✅ Mobile-first responsive design
 
 ## Project Structure
 
 ```
-loraleaf-dashboard/
-├── index.html                    # Main dashboard page
-├── api/
-│   ├── nodes.py                  # Azure Function: Get sensor data
-│   └── function.json             # Function configuration
-├── .github/
-│   └── workflows/
-│       └── azure-static-web-apps.yml  # GitHub Actions deployment
-├── host.json                     # Azure Functions host config
-├── requirements.txt              # Python dependencies
-└── staticwebapp.config.json      # Static Web App configuration
+loraleaf-website/
+├── index.html          # Main HTML file
+├── css/
+│   └── style.css       # All styles
+├── js/
+│   └── main.js         # JavaScript functionality
+├── images/
+│   ├── loraleaf-logo.svg
+│   ├── loraleaf-logo.png (optional)
+│   ├── sensor_data_visualization.png
+│   └── sensor_data_timeseries.png
+└── README.md
 ```
 
-## API Endpoints
+## Technology Stack
 
-### GET /api/nodes
+- **HTML5** - Semantic markup
+- **CSS3** - Custom styles, CSS Grid, Flexbox
+- **Vanilla JavaScript** - No frameworks needed
+- **Google Fonts** - Inter font family
 
-Returns the latest sensor data for all nodes.
+## Setup & Deployment
 
-**Response:**
-```json
-{
-  "nodes": [
-    {
-      "node_id": "NODE_01",
-      "temperature": 19.5,
-      "pressure": 1013.2,
-      "humidity": 45.3,
-      "battery_voltage": 3.8,
-      "battery_percent": 67,
-      "rssi": -85,
-      "snr": 8.5,
-      "last_update": "2025-12-23 12:30:45",
-      "seconds_since_update": 15
-    }
-  ]
+### Local Development
+
+1. Simply open `index.html` in a web browser
+2. Or use a local server:
+   ```bash
+   python3 -m http.server 8000
+   # Visit http://localhost:8000
+   ```
+
+### Deployment Options
+
+#### Option 1: Netlify (Recommended)
+
+1. Create account at [netlify.com](https://netlify.com)
+2. Drag and drop the `loraleaf-website` folder
+3. Configure custom domains:
+   - loraleaf.com
+   - loraleaf.co.uk
+4. Enable HTTPS (automatic with Netlify)
+
+#### Option 2: GitHub Pages
+
+1. Create a GitHub repository
+2. Push the website files
+3. Enable GitHub Pages in repository settings
+4. Configure custom domains in settings
+
+#### Option 3: Vercel
+
+1. Create account at [vercel.com](https://vercel.com)
+2. Import the project
+3. Configure custom domains
+
+### Domain Configuration
+
+For both **loraleaf.com** and **loraleaf.co.uk**:
+
+1. Point DNS A record to hosting provider's IP
+2. Or use CNAME record to provider's domain
+3. Enable SSL/HTTPS
+4. Set one domain as primary, other as redirect
+
+Example DNS settings (Netlify):
+```
+Type: A
+Name: @
+Value: 75.2.60.5
+
+Type: CNAME
+Name: www
+Value: your-site.netlify.app
+```
+
+## Contact Form Setup
+
+The contact form currently uses a placeholder action. Choose one:
+
+### Option 1: Formspree (Easiest)
+
+1. Sign up at [formspree.io](https://formspree.io)
+2. Create a new form
+3. Replace in `index.html`:
+   ```html
+   <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+   ```
+
+### Option 2: Netlify Forms
+
+1. Add `netlify` attribute to form:
+   ```html
+   <form name="contact" method="POST" data-netlify="true">
+   ```
+2. Deploy to Netlify
+3. Forms automatically work!
+
+### Option 3: Custom Backend
+
+Implement your own backend endpoint and update the form action URL.
+
+## Customization
+
+### Update Logo
+
+Replace `images/loraleaf-logo.png` or `images/loraleaf-logo.svg` with your final logo.
+Current logo is a placeholder SVG.
+
+### Update Contact Email
+
+In `index.html`, find and replace:
+```html
+<a href="mailto:info@loraleaf.com">info@loraleaf.com</a>
+```
+
+### Update Colors
+
+In `css/style.css`, modify the CSS variables:
+```css
+:root {
+    --color-primary: #2D5A27;    /* Deep green */
+    --color-secondary: #7CB342;   /* Fresh leaf green */
+    --color-accent: #5E8B47;      /* Mid green */
+    /* ... */
 }
 ```
 
-## Data Flow
+### Add Hero Image
 
-1. Sensor nodes post data to Pi4 via LoRa/WiFi
-2. Pi4 Flask app stores data in both:
-   - Local SQLite database
-   - Azure Table Storage (via `azure_storage_helper.py`)
-3. Azure Functions API queries Azure Table Storage
-4. Dashboard fetches data from Azure Functions API
-5. Dashboard updates every 30 seconds
-
-## Table Storage Schema
-
-**Table Name:** `sensorreadings`
-
-- **PartitionKey:** `node_id` (e.g., "NODE_01")
-- **RowKey:** `YYYYMMDDHHMMSSffffff` (timestamp)
-- **Fields:**
-  - temperature (float)
-  - pressure (float)
-  - humidity (float)
-  - battery_voltage (float)
-  - battery_percent (int)
-  - rssi (int)
-  - snr (float)
-
-## Node Types
-
-- **NODE_01, NODE_02:** LoRa outdoor sensor nodes
-- **NODE_INDOORS:** Indoor reference node (excluded from averages)
-- **NODE_WIFI:** WiFi-connected outdoor node (excluded from averages)
-
-## Development
-
-### Local Testing
-
-1. Install Azure Functions Core Tools
-2. Create a `local.settings.json`:
-```json
-{
-  "IsEncrypted": false,
-  "Values": {
-    "AzureWebJobsStorage": "",
-    "FUNCTIONS_WORKER_RUNTIME": "python",
-    "AZURE_STORAGE_CONNECTION_STRING": "<your_connection_string>"
-  }
-}
+Replace the SVG illustration in the hero section with an actual photo:
+```html
+<div class="hero-image">
+    <img src="images/hero-image.jpg" alt="LoRaLeaf sensors in field">
+</div>
 ```
-3. Run: `func start`
 
-### Frontend Testing
+## Assets to Replace
 
-Simply open `index.html` in a browser or use a local web server:
-```bash
-python -m http.server 8000
+Current placeholders to replace with professional assets:
+
+1. **Logo** - `images/loraleaf-logo.png` (currently SVG placeholder)
+2. **Hero Image** - Add professional photo of sensors in agricultural setting
+3. **Product Photos** - Add images of actual sensor nodes
+4. **Dashboard** - Currently uses real sensor data visualizations (keep these!)
+
+## Real Data Integration
+
+The website currently displays **real sensor data** from your LoRa network:
+
+- 2,094 readings collected
+- Temperature range: 15°C - 22°C (last 24 hours)
+- 2 active sensor nodes (NODE_01 and NODE_02)
+
+The dashboard preview shows actual data visualizations from `/images/sensor_data_visualization.png`.
+
+## SEO
+
+The site includes:
+- Meta descriptions
+- Open Graph tags for social sharing
+- Semantic HTML structure
+- Fast loading times
+- Mobile-responsive design
+
+### To improve SEO further:
+
+1. Add `sitemap.xml`
+2. Add `robots.txt`
+3. Set up Google Analytics
+4. Submit to Google Search Console
+5. Add schema.org markup for LocalBusiness
+
+## Browser Support
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+- Mobile browsers (iOS Safari, Chrome Mobile)
+
+## Performance
+
+- Minimal dependencies (only Google Fonts)
+- Optimized images
+- CSS and JS minification ready
+- Lazy loading ready
+
+## Next Steps (Phase 2)
+
+Future enhancements not included in this version:
+
+- [ ] Customer login portal
+- [ ] Live dashboard integration
+- [ ] Online ordering system
+- [ ] Case studies section
+- [ ] Blog/news section
+- [ ] Multi-language support
+- [ ] Advanced analytics
+
+## Support & Maintenance
+
+### Updating Content
+
+All content is in `index.html` and easily editable:
+- Section headings
+- Feature descriptions
+- Use cases
+- Technical specifications
+- Contact information
+
+### Adding Analytics
+
+Add Google Analytics or similar before `</head>`:
+```html
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'GA_MEASUREMENT_ID');
+</script>
 ```
 
 ## License
 
-MIT
+© 2025 LoRaLeaf / AV3 Media. All rights reserved.
 
-## Live Dashboard
+## Contact
 
-The dashboard is deployed at: https://blue-glacier-0ff05ed03.3.azurestaticapps.net
+Tom Harding
+AV3 Media
+Cornwall, UK
+info@loraleaf.com
 
-## Credits
+---
 
-Built with Claude Code
+Built with attention to detail for professional agricultural technology marketing.

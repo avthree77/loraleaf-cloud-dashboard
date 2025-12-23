@@ -1,0 +1,26 @@
+<svg width="600" height="200" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Leaf shape -->
+  <defs>
+    <linearGradient id="leafGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2D5A27;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#5E8B47;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7CB342;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Main leaf shape -->
+  <path d="M100,160 Q100,80 100,50 Q100,20 85,15 Q70,10 60,25 Q50,40 55,60 Q60,80 65,100 Q70,120 75,140 Q80,160 100,160 Z" fill="url(#leafGradient)"/>
+  <path d="M100,160 Q100,80 100,50 Q100,20 115,15 Q130,10 140,25 Q150,40 145,60 Q140,80 135,100 Q130,120 125,140 Q120,160 100,160 Z" fill="url(#leafGradient)" opacity="0.8"/>
+
+  <!-- Circuit/antenna pattern in leaf -->
+  <path d="M100,50 L100,90 M80,70 L100,70 L120,70 M100,90 Q85,95 85,110 M100,90 Q115,95 115,110"
+        stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="85" cy="110" r="5" fill="white"/>
+  <circle cx="115" cy="110" r="5" fill="white"/>
+  <circle cx="100" cy="50" r="6" fill="white"/>
+
+  <!-- Text: LORALEAF -->
+  <text x="180" y="120" font-family="Inter, Arial, sans-serif" font-size="60" font-weight="700" fill="#2D5A27">
+    LORALEAF
+  </text>
+</svg>

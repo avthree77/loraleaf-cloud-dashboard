@@ -1,0 +1,110 @@
+╔════════════════════════════════════════════════════════════════════╗
+║              LoRaLeaf - Deploy to Azure (3 Minutes)               ║
+╚════════════════════════════════════════════════════════════════════╝
+
+Your LoRaLeaf website is ready to deploy to Microsoft Azure!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 WHAT'S INCLUDED FOR AZURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ azure-deploy.sh              - Automated deployment script
+✓ staticwebapp.config.json     - Azure configuration
+✓ AZURE_DEPLOYMENT.md          - Complete deployment guide
+✓ AZURE_QUICK_START.md         - Quick reference
+✓ Complete website files       - Ready to deploy
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 FASTEST DEPLOYMENT METHOD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Check Azure CLI:
+
+   az --version
+
+   (If not installed: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash)
+
+2. Run the deployment script:
+
+   cd /home/av3/loraleaf-website
+   ./azure-deploy.sh
+
+3. Done! Your site will be live in ~2 minutes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💰 COST: FREE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Azure Static Web Apps Free Tier includes:
+• 100 GB bandwidth per month
+• 0.5 GB storage
+• Free SSL certificates
+• Global CDN
+• Custom domains (loraleaf.com & loraleaf.co.uk)
+• 99.9% uptime SLA
+
+Perfect for LoRaLeaf - you'll stay in free tier!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌍 YOUR SITE WILL BE AT:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Initial: https://loraleaf.azurestaticapps.net
+Final:   https://loraleaf.com
+         https://loraleaf.co.uk
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 AFTER DEPLOYMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Add custom domains in Azure Portal
+2. Update DNS at your domain registrar
+3. Wait 1-4 hours for DNS propagation
+4. SSL certificates auto-provision
+5. Your site is live!
+
+The script will provide specific commands for your domains.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 WHAT AZURE PROVIDES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Global CDN (faster loading worldwide)
+✓ Automatic HTTPS/SSL
+✓ DDoS protection
+✓ 99.9% uptime SLA
+✓ Automatic scaling
+✓ Built-in security headers
+✓ UK South datacenter (close to Cornwall!)
+✓ Azure monitoring & analytics
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📚 DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+• AZURE_QUICK_START.md  - Quick reference guide
+• AZURE_DEPLOYMENT.md   - Detailed deployment instructions
+• README.md             - General website documentation
+• DEPLOYMENT.md         - Alternative deployment options
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔧 NEED HELP?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Azure Documentation:
+  https://docs.microsoft.com/azure/static-web-apps
+
+Azure Portal:
+  https://portal.azure.com
+
+Support:
+  Available in Azure Portal (free tier has community support)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ready? Let's deploy! 🚀
+
+  cd /home/av3/loraleaf-website
+  ./azure-deploy.sh
+
+Your LoRaLeaf website will be live on Azure in minutes!

@@ -1,0 +1,7 @@
+# robots.txt for LoRaLeaf
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Sitemaps
+Sitemap: https://blue-glacier-0ff05ed03.3.azurestaticapps.net/sitemap.xml

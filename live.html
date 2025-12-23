@@ -333,19 +333,19 @@
         <!-- Charts Section -->
         <div class="charts-section">
             <div class="chart-card">
-                <div class="chart-title">Temperature (Last 24 Hours)</div>
+                <div class="chart-title">🌡️ Temperature - Outdoor Nodes (24h)</div>
                 <div class="chart-container">
                     <canvas id="tempChart"></canvas>
                 </div>
             </div>
             <div class="chart-card">
-                <div class="chart-title">Pressure (Last 24 Hours)</div>
+                <div class="chart-title">📊 Pressure - Outdoor Nodes (24h)</div>
                 <div class="chart-container">
                     <canvas id="pressureChart"></canvas>
                 </div>
             </div>
             <div class="chart-card">
-                <div class="chart-title">Humidity (Last 24 Hours)</div>
+                <div class="chart-title">💧 Humidity - Outdoor Nodes (24h)</div>
                 <div class="chart-container">
                     <canvas id="humidityChart"></canvas>
                 </div>
@@ -640,46 +640,97 @@
             return nodeData;
         }
 
-        function updateCharts(readings) {
-            const nodeData = processHistoricalData(readings);
+        function createMultiNodeChart(chartId, chartInstance, label, nodeData, dataKey, colors) {
+            const ctx = document.getElementById(chartId).getContext('2d');
 
-            // Combine all node data
-            const allTimestamps = [];
-            const allTemps = [];
-            const allPressures = [];
-            const allHumidities = [];
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
 
-            Object.keys(nodeData).forEach(nodeId => {
-                allTimestamps.push(...nodeData[nodeId].timestamps);
-                allTemps.push(...nodeData[nodeId].temperatures);
-                allPressures.push(...nodeData[nodeId].pressures);
-                allHumidities.push(...nodeData[nodeId].humidities);
+            const datasets = [];
+            const nodeIds = ['NODE_01', 'NODE_02']; // Only outdoor LoRa nodes
+
+            nodeIds.forEach((nodeId, index) => {
+                if (nodeData[nodeId]) {
+                    datasets.push({
+                        label: nodeId,
+                        data: nodeData[nodeId][dataKey],
+                        borderColor: colors[index],
+                        backgroundColor: colors[index] + '20',
+                        tension: 0.4,
+                        fill: false,
+                        pointRadius: 2,
+                        pointHoverRadius: 4
+                    });
+                }
             });
 
-            // Sample data to max 50 points for readability
-            const step = Math.max(1, Math.floor(allTimestamps.length / 50));
-            const sampledTimestamps = allTimestamps.filter((_, i) => i % step === 0);
-            const sampledTemps = allTemps.filter((_, i) => i % step === 0);
-            const sampledPressures = allPressures.filter((_, i) => i % step === 0);
-            const sampledHumidities = allHumidities.filter((_, i) => i % step === 0);
+            // Get all unique timestamps (use NODE_01 or NODE_02 timestamps)
+            const labels = nodeData['NODE_01']?.timestamps || nodeData['NODE_02']?.timestamps || [];
 
-            // Update temperature chart
-            tempChart = createOrUpdateChart('tempChart', tempChart, 'Temperature (°C)', {
-                labels: sampledTimestamps,
-                values: sampledTemps
-            }, '#e74c3c');
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            display: true,
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
 
-            // Update pressure chart
-            pressureChart = createOrUpdateChart('pressureChart', pressureChart, 'Pressure (hPa)', {
-                labels: sampledTimestamps,
-                values: sampledPressures
-            }, '#3498db');
+        function updateCharts(readings) {
+            // Filter to only NODE_01 and NODE_02
+            const outdoorReadings = readings.filter(r =>
+                r.node_id === 'NODE_01' || r.node_id === 'NODE_02'
+            );
 
-            // Update humidity chart
-            humidityChart = createOrUpdateChart('humidityChart', humidityChart, 'Humidity (%)', {
-                labels: sampledTimestamps,
-                values: sampledHumidities
-            }, '#1abc9c');
+            const nodeData = processHistoricalData(outdoorReadings);
+
+            // Sample data if needed (max 50 points per node)
+            Object.keys(nodeData).forEach(nodeId => {
+                const data = nodeData[nodeId];
+                const step = Math.max(1, Math.floor(data.timestamps.length / 50));
+
+                if (step > 1) {
+                    data.timestamps = data.timestamps.filter((_, i) => i % step === 0);
+                    data.temperatures = data.temperatures.filter((_, i) => i % step === 0);
+                    data.pressures = data.pressures.filter((_, i) => i % step === 0);
+                    data.humidities = data.humidities.filter((_, i) => i % step === 0);
+                }
+            });
+
+            // Update temperature chart with NODE_01 (red) and NODE_02 (orange)
+            tempChart = createMultiNodeChart('tempChart', tempChart, 'Temperature (°C)',
+                nodeData, 'temperatures', ['#e74c3c', '#ff9933']);
+
+            // Update pressure chart with NODE_01 (blue) and NODE_02 (cyan)
+            pressureChart = createMultiNodeChart('pressureChart', pressureChart, 'Pressure (hPa)',
+                nodeData, 'pressures', ['#3498db', '#00bcd4']);
+
+            // Update humidity chart with NODE_01 (teal) and NODE_02 (green)
+            humidityChart = createMultiNodeChart('humidityChart', humidityChart, 'Humidity (%)',
+                nodeData, 'humidities', ['#1abc9c', '#4caf50']);
         }
 
         async function updateDashboard() {

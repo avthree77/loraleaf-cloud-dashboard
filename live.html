@@ -325,6 +325,11 @@
         <!-- Barometer Section -->
         <div id="barometerSection"></div>
 
+        <!-- Node Cards -->
+        <div id="dashboard" class="dashboard">
+            <div class="loading">Loading sensor data...</div>
+        </div>
+
         <!-- Charts Section -->
         <div class="charts-section">
             <div class="chart-card">
@@ -345,10 +350,6 @@
                     <canvas id="humidityChart"></canvas>
                 </div>
             </div>
-        </div>
-
-        <div id="dashboard" class="dashboard">
-            <div class="loading">Loading sensor data...</div>
         </div>
 
         <footer>
@@ -439,6 +440,9 @@
             const stats = calculateAverages(nodes);
             const totalNodes = nodes.length;
 
+            // Count all active nodes (not just outdoor ones)
+            const allActiveNodes = nodes.filter(n => n.seconds_since_update < INACTIVE_THRESHOLD).length;
+
             return `
                 <div class="stats-summary">
                     <div class="stats-grid">
@@ -455,7 +459,7 @@
                             <div class="stat-label">Average Humidity</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-value">${stats.activeCount}/${totalNodes}</div>
+                            <div class="stat-value">${allActiveNodes}/${totalNodes}</div>
                             <div class="stat-label">Active Nodes</div>
                         </div>
                     </div>

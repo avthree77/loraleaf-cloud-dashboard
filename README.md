@@ -160,6 +160,10 @@ python -m http.server 8000
 
 MIT
 
+## Live Dashboard
+
+The dashboard is deployed at: https://blue-glacier-0ff05ed03.3.azurestaticapps.net
+
 ## Credits
 
 Built with Claude Code

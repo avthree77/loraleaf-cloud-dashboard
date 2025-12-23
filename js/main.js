@@ -54,27 +54,66 @@ document.querySelectorAll('.feature-card, .use-case-card, .step-card, .stat-card
 
 // Form submission handling
 const contactForm = document.getElementById('contactForm');
+const formMessage = document.getElementById('formMessage');
 
 if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const formData = new FormData(contactForm);
         const button = contactForm.querySelector('button[type="submit"]');
         const originalText = button.textContent;
 
         button.textContent = 'Sending...';
         button.disabled = true;
 
-        try {
-            // If using Formspree or similar service, the form will submit normally
-            // For demo purposes, we'll simulate a submission
-            await new Promise(resolve => setTimeout(resolve, 1000));
+        // Hide previous message
+        if (formMessage) {
+            formMessage.style.display = 'none';
+        }
 
-            alert('Thank you for your message! We will get back to you soon.');
-            contactForm.reset();
+        try {
+            // Get form data
+            const formData = {
+                name: contactForm.querySelector('#name').value,
+                email: contactForm.querySelector('#email').value,
+                organization: contactForm.querySelector('#organization').value,
+                message: contactForm.querySelector('#message').value
+            };
+
+            // Submit to Azure Function
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                // Success
+                if (formMessage) {
+                    formMessage.textContent = result.message || 'Thank you for your message! We will get back to you soon.';
+                    formMessage.style.color = '#2ecc71';
+                    formMessage.style.display = 'block';
+                }
+                contactForm.reset();
+            } else {
+                // Error
+                if (formMessage) {
+                    formMessage.textContent = result.error || 'Sorry, there was an error. Please email us directly at info@loraleaf.com';
+                    formMessage.style.color = '#e74c3c';
+                    formMessage.style.display = 'block';
+                }
+            }
         } catch (error) {
-            alert('Sorry, there was an error sending your message. Please try again or email us directly.');
+            console.error('Form submission error:', error);
+            if (formMessage) {
+                formMessage.textContent = 'Sorry, there was an error. Please email us directly at info@loraleaf.com';
+                formMessage.style.color = '#e74c3c';
+                formMessage.style.display = 'block';
+            }
         } finally {
             button.textContent = originalText;
             button.disabled = false;

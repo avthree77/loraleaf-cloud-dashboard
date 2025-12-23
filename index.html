@@ -402,9 +402,7 @@
                     </p>
                 </div>
 
-                <form class="contact-form" id="contactForm" action="https://formspree.io/f/info@loraleaf.com" method="POST">
-                    <input type="hidden" name="_subject" value="LoRaLeaf Website Contact Form">
-
+                <form class="contact-form" id="contactForm">
                     <div class="form-group">
                         <label for="name">Name</label>
                         <input type="text" id="name" name="name" required>
@@ -412,7 +410,7 @@
 
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input type="email" id="email" name="_replyto" required>
+                        <input type="email" id="email" name="email" required>
                     </div>
 
                     <div class="form-group">
@@ -425,7 +423,8 @@
                         <textarea id="message" name="message" rows="5" required></textarea>
                     </div>
 
-                    <button type="submit" class="btn-primary btn-large">Send Message</button>
+                    <button type="submit" class="btn-primary btn-large" id="submitBtn">Send Message</button>
+                    <div id="formMessage" style="margin-top: 1rem; display: none;"></div>
                 </form>
             </div>
         </div>

@@ -1,260 +1,262 @@
-# LoRaLeaf Website
+# LoRaLeaf - Wireless Environmental Monitoring
 
-Professional single-page marketing website for LoRaLeaf - a LoRa-based environmental monitoring system for agriculture and estates.
+Solar-powered LoRa sensor network for agricultural environmental monitoring. Built for farms, estates, and vineyards.
 
-## Overview
+## 🌐 Live Website
 
-This is a complete, production-ready website built for **loraleaf.com** and **loraleaf.co.uk**.
+- **Marketing Site**: https://blue-glacier-0ff05ed03.3.azurestaticapps.net
+- **Live Dashboard**: https://blue-glacier-0ff05ed03.3.azurestaticapps.net/live
+- **GitHub Repo**: https://github.com/avthree77/loraleaf-cloud-dashboard
 
-### Features
+## 📊 Current Setup
 
-- ✅ Fully responsive single-page design
-- ✅ Modern, clean UI with green/agricultural theme
-- ✅ Real sensor data integration (dashboard preview)
-- ✅ Contact form ready
-- ✅ SEO optimized
-- ✅ Fast loading, minimal dependencies
-- ✅ Mobile-first responsive design
+### Sensor Network
 
-## Project Structure
+**4 Active Nodes** posting to Azure Table Storage:
+
+- **NODE_01** - LoRa outdoor sensor (BME280)
+- **NODE_02** - LoRa outdoor sensor (BME280)
+- **NODE_WIFI** - Pico 2W with solar panel + battery monitoring
+- **NODE_INDOORS** - Raspberry Pi 4 BME280 sensor
+
+### Data Collection
+
+- **Every ~4 minutes**: LoRa nodes transmit
+- **Every 60 seconds**: NODE_WIFI & NODE_INDOORS post
+- **Storage**: Azure Table Storage (`sensorreadings` table)
+- **API**: Azure Functions provide real-time & historical data
+- **Validation**: Bad readings automatically rejected (pressure, humidity ranges)
+
+## 🚀 Azure Deployment
+
+### Automatic Deployment
+
+The site **auto-deploys to Azure** via **GitHub Actions** whenever you push to the `main` branch.
+
+**Workflow**: `.github/workflows/azure-static-web-apps-*.yml`
+
+### Azure Resources
+
+- **Service**: Azure Static Web Apps (Free tier)
+- **Storage**: Azure Table Storage (`loraleafstorage`)
+- **Functions**: Python Azure Functions (API endpoints)
+- **Region**: Deployed automatically
+
+### Cost
+
+- **~$0.50 USD/month** (mostly Azure Table Storage writes)
+- Well within free tiers for Static Web Apps and Functions
+
+## 📁 Project Structure
 
 ```
-loraleaf-website/
-├── index.html          # Main HTML file
+loraleaf-dashboard/
+├── index.html              # Marketing homepage
+├── live.html               # Live sensor dashboard
 ├── css/
-│   └── style.css       # All styles
+│   └── style.css          # Website styles
 ├── js/
-│   └── main.js         # JavaScript functionality
+│   └── main.js            # Website JavaScript
 ├── images/
-│   ├── loraleaf-logo.svg
-│   ├── loraleaf-logo.png (optional)
-│   ├── sensor_data_visualization.png
-│   └── sensor_data_timeseries.png
-└── README.md
+│   ├── LoRaLeaf-field.png     # Product photos
+│   ├── LoRaLeaf-Sensor.png
+│   └── loraleaf-logo.svg
+├── api/                   # Azure Functions
+│   ├── nodes/             # GET /api/nodes - Latest sensor data
+│   ├── history/           # GET /api/history?hours=24 - Historical data
+│   ├── contact/           # POST /api/contact - Contact form handler
+│   └── submissions/       # GET /api/submissions - View form submissions
+├── staticwebapp.config.json  # Azure routing config
+├── robots.txt             # SEO - Search engine instructions
+├── sitemap.xml            # SEO - Site structure
+└── README.md              # This file
 ```
 
-## Technology Stack
+## 🛠️ API Endpoints
 
-- **HTML5** - Semantic markup
-- **CSS3** - Custom styles, CSS Grid, Flexbox
-- **Vanilla JavaScript** - No frameworks needed
-- **Google Fonts** - Inter font family
+### `/api/nodes`
 
-## Setup & Deployment
+Get latest reading from each sensor node.
 
-### Local Development
-
-1. Simply open `index.html` in a web browser
-2. Or use a local server:
-   ```bash
-   python3 -m http.server 8000
-   # Visit http://localhost:8000
-   ```
-
-### Deployment Options
-
-#### Option 1: Netlify (Recommended)
-
-1. Create account at [netlify.com](https://netlify.com)
-2. Drag and drop the `loraleaf-website` folder
-3. Configure custom domains:
-   - loraleaf.com
-   - loraleaf.co.uk
-4. Enable HTTPS (automatic with Netlify)
-
-#### Option 2: GitHub Pages
-
-1. Create a GitHub repository
-2. Push the website files
-3. Enable GitHub Pages in repository settings
-4. Configure custom domains in settings
-
-#### Option 3: Vercel
-
-1. Create account at [vercel.com](https://vercel.com)
-2. Import the project
-3. Configure custom domains
-
-### Domain Configuration
-
-For both **loraleaf.com** and **loraleaf.co.uk**:
-
-1. Point DNS A record to hosting provider's IP
-2. Or use CNAME record to provider's domain
-3. Enable SSL/HTTPS
-4. Set one domain as primary, other as redirect
-
-Example DNS settings (Netlify):
-```
-Type: A
-Name: @
-Value: 75.2.60.5
-
-Type: CNAME
-Name: www
-Value: your-site.netlify.app
+**Example:**
+```bash
+curl https://blue-glacier-0ff05ed03.3.azurestaticapps.net/api/nodes
 ```
 
-## Contact Form Setup
-
-The contact form currently uses a placeholder action. Choose one:
-
-### Option 1: Formspree (Easiest)
-
-1. Sign up at [formspree.io](https://formspree.io)
-2. Create a new form
-3. Replace in `index.html`:
-   ```html
-   <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-   ```
-
-### Option 2: Netlify Forms
-
-1. Add `netlify` attribute to form:
-   ```html
-   <form name="contact" method="POST" data-netlify="true">
-   ```
-2. Deploy to Netlify
-3. Forms automatically work!
-
-### Option 3: Custom Backend
-
-Implement your own backend endpoint and update the form action URL.
-
-## Customization
-
-### Update Logo
-
-Replace `images/loraleaf-logo.png` or `images/loraleaf-logo.svg` with your final logo.
-Current logo is a placeholder SVG.
-
-### Update Contact Email
-
-In `index.html`, find and replace:
-```html
-<a href="mailto:info@loraleaf.com">info@loraleaf.com</a>
-```
-
-### Update Colors
-
-In `css/style.css`, modify the CSS variables:
-```css
-:root {
-    --color-primary: #2D5A27;    /* Deep green */
-    --color-secondary: #7CB342;   /* Fresh leaf green */
-    --color-accent: #5E8B47;      /* Mid green */
-    /* ... */
+**Response:**
+```json
+{
+  "nodes": [
+    {
+      "node_id": "NODE_01",
+      "temperature": 6.4,
+      "pressure": 1012.1,
+      "humidity": 81.1,
+      "battery_voltage": 3.63,
+      "battery_percent": 52,
+      "rssi": -78,
+      "snr": 3.8,
+      "last_update": "2025-12-23 22:45:30",
+      "seconds_since_update": 15
+    }
+  ]
 }
 ```
 
-### Add Hero Image
+### `/api/history?hours=24`
 
-Replace the SVG illustration in the hero section with an actual photo:
-```html
-<div class="hero-image">
-    <img src="images/hero-image.jpg" alt="LoRaLeaf sensors in field">
-</div>
+Get historical sensor data.
+
+**Parameters:**
+- `hours` (optional, default: 24) - Number of hours of history
+- `node_id` (optional) - Filter by specific node
+
+**Example:**
+```bash
+curl "https://blue-glacier-0ff05ed03.3.azurestaticapps.net/api/history?hours=24"
 ```
 
-## Assets to Replace
+### `/api/submissions`
 
-Current placeholders to replace with professional assets:
+View all contact form submissions (stored in `contactsubmissions` table).
 
-1. **Logo** - `images/loraleaf-logo.png` (currently SVG placeholder)
-2. **Hero Image** - Add professional photo of sensors in agricultural setting
-3. **Product Photos** - Add images of actual sensor nodes
-4. **Dashboard** - Currently uses real sensor data visualizations (keep these!)
-
-## Real Data Integration
-
-The website currently displays **real sensor data** from your LoRa network:
-
-- 2,094 readings collected
-- Temperature range: 15°C - 22°C (last 24 hours)
-- 2 active sensor nodes (NODE_01 and NODE_02)
-
-The dashboard preview shows actual data visualizations from `/images/sensor_data_visualization.png`.
-
-## SEO
-
-The site includes:
-- Meta descriptions
-- Open Graph tags for social sharing
-- Semantic HTML structure
-- Fast loading times
-- Mobile-responsive design
-
-### To improve SEO further:
-
-1. Add `sitemap.xml`
-2. Add `robots.txt`
-3. Set up Google Analytics
-4. Submit to Google Search Console
-5. Add schema.org markup for LocalBusiness
-
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-- Mobile browsers (iOS Safari, Chrome Mobile)
-
-## Performance
-
-- Minimal dependencies (only Google Fonts)
-- Optimized images
-- CSS and JS minification ready
-- Lazy loading ready
-
-## Next Steps (Phase 2)
-
-Future enhancements not included in this version:
-
-- [ ] Customer login portal
-- [ ] Live dashboard integration
-- [ ] Online ordering system
-- [ ] Case studies section
-- [ ] Blog/news section
-- [ ] Multi-language support
-- [ ] Advanced analytics
-
-## Support & Maintenance
-
-### Updating Content
-
-All content is in `index.html` and easily editable:
-- Section headings
-- Feature descriptions
-- Use cases
-- Technical specifications
-- Contact information
-
-### Adding Analytics
-
-Add Google Analytics or similar before `</head>`:
-```html
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'GA_MEASUREMENT_ID');
-</script>
+**Example:**
+```bash
+curl https://blue-glacier-0ff05ed03.3.azurestaticapps.net/api/submissions
 ```
 
-## License
+## 🔧 Making Changes
 
-© 2025 LoRaLeaf / AV3 Media. All rights reserved.
+### 1. Edit Files Locally
 
-## Contact
+```bash
+cd /Users/av3/Documents/loraleaf-dashboard
+# Edit files as needed
+```
 
-Tom Harding
-AV3 Media
-Cornwall, UK
-info@loraleaf.com
+### 2. Commit & Push
+
+```bash
+git add .
+git commit -m "Your change description"
+git push origin main
+```
+
+### 3. Auto-Deploy
+
+GitHub Actions automatically deploys to Azure within ~2 minutes.
+
+Watch deployment progress: https://github.com/avthree77/loraleaf-cloud-dashboard/actions
+
+## 📡 Sensor Network Setup
+
+### Pi4 Sensor Hub (192.168.1.85)
+
+**Location**: `/home/pi/`
+
+**Key Files:**
+- `lora_sensor_web_gui.py` - Flask server handling LoRa nodes (NODE_01, NODE_02)
+- `indoor_bme280_logger.py` - Indoor sensor logger (NODE_INDOORS)
+- `azure_storage_helper.py` - Azure Table Storage posting (with validation)
+- `lora_sensor_data.db` - Local SQLite database
+
+**Services:**
+- Web GUI: http://192.168.1.85:5000 (local network only)
+- Auto-posts to Azure every reading
+
+### Data Validation
+
+Bad sensor readings are automatically rejected:
+- Temperature: -40°C to 60°C
+- Pressure: 950 to 1100 hPa
+- Humidity: 0.1% to 99.9% (excludes exactly 0 or 100)
+- Battery: 0V to 5V
+
+Invalid data is logged but not posted to Azure.
+
+## 🎨 SEO & Marketing
+
+### Meta Tags
+
+- **Title**: LoRaLeaf | Wireless Environmental Monitoring for Agriculture & Farms
+- **Description**: Solar-powered LoRa sensor network...
+- **Keywords**: LoRa sensors, agricultural monitoring, farm sensors, etc.
+- **Open Graph**: Social media preview cards (Facebook, Twitter, LinkedIn)
+- **Geo Tags**: Cornwall, UK location targeting
+
+### Structured Data
+
+- Schema.org Product markup
+- Schema.org Organization markup
+- Google-friendly rich search results
+
+### Sitemap & Robots
+
+- `sitemap.xml` - All pages indexed
+- `robots.txt` - Search engine guidance
+- Submit to Google Search Console for faster indexing
+
+## 📊 Live Dashboard Features
+
+**URL**: `/live`
+
+**Features:**
+- Real-time sensor data (auto-refresh every 30 seconds)
+- 4 node cards showing current readings
+- Key statistics (average temp, pressure, humidity)
+- Barometric pressure trend indicator (rising/falling/steady)
+- Historical graphs (24 hours):
+  - Temperature (NODE_01 & NODE_02)
+  - Pressure (NODE_01 & NODE_02)
+  - Humidity (NODE_01 & NODE_02)
+- Charts auto-refresh every 5 minutes
+
+**Data Source**: Outdoor LoRa nodes (NODE_01, NODE_02) only
+
+## 🔐 Security Notes
+
+- **Public APIs**: All endpoints are public (no authentication)
+- **Form Submissions**: Stored in Azure Table Storage
+- **Connection Strings**: Stored in Azure environment variables (not in code)
+- **CSP Headers**: Content Security Policy configured in `staticwebapp.config.json`
+
+## 🌍 Contact
+
+- **Email**: info@loraleaf.com
+- **Location**: Cornwall, UK
+- **Company**: AV3 Media
+
+## 📝 Version History
+
+- **2025-12-23**: Initial website launch with marketing site + live dashboard
+- **2025-12-23**: Added real product photos
+- **2025-12-23**: Enhanced SEO metadata and structured data
+- **2025-12-23**: Added historical graphing and barometer
+- **2025-12-23**: Simplified contact to email button
+
+## 🎯 Future Enhancements (Optional)
+
+- [ ] Email notifications for new contact form submissions (SendGrid)
+- [ ] Custom domain (loraleaf.com)
+- [ ] SSL certificate for custom domain
+- [ ] Admin dashboard for viewing/managing form submissions
+- [ ] Export sensor data to CSV
+- [ ] Alert system for frost/extreme conditions
+- [ ] Mobile app
+
+## 💰 Cost Breakdown
+
+**Monthly Costs (Estimated):**
+
+- Azure Static Web Apps: **$0** (free tier)
+- Azure Functions: **$0** (free tier - under 1M executions)
+- Azure Table Storage: **~$0.50** (75k writes/month + storage)
+- **Total: ~$0.50 USD/month**
+
+## 🎄 Merry Christmas!
+
+Deployed and running smoothly. Enjoy collecting data over the holidays!
 
 ---
 
-Built with attention to detail for professional agricultural technology marketing.
+Built with ❤️ in Cornwall by AV3 Media

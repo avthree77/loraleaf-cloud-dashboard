@@ -614,6 +614,15 @@ section {
     grid-template-columns: 1fr 2fr;
     gap: 4rem;
     margin-top: 3rem;
+    align-items: center;
+}
+
+.contact-cta {
+    background-color: var(--color-white);
+    padding: 3rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    text-align: center;
 }
 
 .contact-info h3 {

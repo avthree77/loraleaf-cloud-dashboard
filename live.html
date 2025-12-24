@@ -718,102 +718,227 @@
             }
         }
 
-        // Map Functions
+        // Map Functions - Using Pi4 GUI working code
+        let markers = {};
+        let heatMapMode = false;
+        let heatMapCircles = [];
+        let heatMapLegend = null;
+
+        // Initialize map - Same as Pi4 GUI
         function initMap() {
-            try {
-                if (typeof L === 'undefined') {
-                    console.error('Leaflet not loaded');
-                    return;
-                }
+            map = L.map('map').setView([50.2660, -5.0527], 10);
 
-                map = L.map('map', {
-                    center: [50.2660, -5.0527],
-                    zoom: 15,
-                    zoomControl: true
-                });
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors',
-                    maxZoom: 19,
-                    minZoom: 10
-                }).addTo(map);
-
-                console.log('Map initialized successfully');
-            } catch (error) {
-                console.error('Map init error:', error);
-            }
+            console.log('Map initialized successfully');
         }
+
+        // Custom icon for sensor nodes - Same as Pi4 GUI
+        const sensorIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: "<div style='background-color:#667eea;width:30px;height:30px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;'>📡</div>",
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
 
         function updateMapMarkers(nodes) {
             if (!map) return;
 
-            try {
-                map.eachLayer((layer) => {
-                    if (layer instanceof L.Marker) map.removeLayer(layer);
-                });
+            // Clear existing markers
+            Object.values(markers).forEach(marker => map.removeLayer(marker));
+            markers = {};
 
-                nodes.forEach(node => {
-                    const location = NODE_LOCATIONS[node.node_id];
-                    if (location) {
-                        const isActive = node.seconds_since_update < INACTIVE_THRESHOLD;
-                        const markerColor = isActive ? '#2ecc71' : '#e74c3c';
+            // Add markers for nodes with locations
+            nodes.forEach(node => {
+                const location = NODE_LOCATIONS[node.node_id];
+                if (location) {
+                    const marker = L.marker([location.lat, location.lng], {icon: sensorIcon});
 
-                        const customIcon = L.divIcon({
-                            className: 'custom-marker',
-                            html: `<div style="background-color:${markerColor};width:30px;height:30px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;">📡</div>`,
-                            iconSize: [30, 30],
-                            iconAnchor: [15, 15]
-                        });
-
-                        const marker = L.marker([location.lat, location.lng], { icon: customIcon })
-                            .addTo(map)
-                            .bindPopup(`
-                                <strong>${node.node_id}</strong><br>
-                                ${location.name}<br>
-                                Temp: ${node.temperature.toFixed(1)}°C<br>
-                                Pressure: ${node.pressure.toFixed(1)} hPa<br>
-                                Humidity: ${node.humidity.toFixed(1)}%<br>
-                                Status: ${isActive ? 'Active' : 'Inactive'}
-                            `);
+                    // Only add to map if NOT in heat map mode
+                    if (!heatMapMode) {
+                        marker.addTo(map);
                     }
-                });
-            } catch (error) {
-                console.error('Error updating markers:', error);
+
+                    // Enhanced popup with all sensor data
+                    const popupContent = `
+                        <div style="min-width:250px;padding:5px;">
+                            <div style="text-align:center;font-size:18px;font-weight:bold;margin-bottom:10px;color:#667eea;">
+                                ${node.node_id}
+                            </div>
+                            ${location.name ? `<div style="text-align:center;color:#666;margin-bottom:8px;"><strong>${location.name}</strong></div>` : ''}
+                            <hr style="margin:10px 0;border:none;border-top:2px solid #f0f0f0;">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                                <div><strong>🌡️ Temp:</strong></div><div style="text-align:right;color:#f59e0b;">${node.temperature.toFixed(1)}°C</div>
+                                <div><strong>💧 Humidity:</strong></div><div style="text-align:right;color:#06b6d4;">${node.humidity.toFixed(1)}%</div>
+                                <div><strong>🔽 Pressure:</strong></div><div style="text-align:right;color:#3b82f6;">${node.pressure.toFixed(1)} hPa</div>
+                                ${node.battery_voltage ? `
+                                <div><strong>🔋 Battery:</strong></div><div style="text-align:right;color:#10b981;">${node.battery_voltage.toFixed(2)}V (${node.battery_percent}%)</div>
+                                ` : ''}
+                                ${node.rssi ? `
+                                <div><strong>📶 RSSI:</strong></div><div style="text-align:right;color:#8b5cf6;">${node.rssi} dBm</div>
+                                <div><strong>📡 SNR:</strong></div><div style="text-align:right;color:#ec4899;">${node.snr.toFixed(1)} dB</div>
+                                ` : ''}
+                            </div>
+                            <hr style="margin:10px 0;border:none;border-top:1px solid #f0f0f0;">
+                            <div style="text-align:center;font-size:11px;color:#999;">
+                                Last update: ${node.last_update}
+                            </div>
+                        </div>
+                    `;
+                    marker.bindPopup(popupContent);
+
+                    markers[node.node_id] = marker;
+                }
+            });
+
+            // If we have markers, fit the map to show them (only if not in heat map mode)
+            if (!heatMapMode) {
+                const markerArray = Object.values(markers);
+                if (markerArray.length > 0) {
+                    const group = L.featureGroup(markerArray);
+                    map.fitBounds(group.getBounds().pad(0.2));
+                }
             }
+        }
+
+        // Heat map helper functions from Pi4 GUI
+        function temperatureToColor(temp) {
+            const clampedTemp = Math.max(-20, Math.min(50, temp));
+
+            if (clampedTemp <= 0) {
+                const ratio = (clampedTemp + 20) / 20;
+                return interpolateColor('#3B82F6', '#06B6D4', ratio);
+            } else if (clampedTemp <= 15) {
+                const ratio = clampedTemp / 15;
+                return interpolateColor('#06B6D4', '#10B981', ratio);
+            } else if (clampedTemp <= 25) {
+                const ratio = (clampedTemp - 15) / 10;
+                return interpolateColor('#10B981', '#F59E0B', ratio);
+            } else if (clampedTemp <= 35) {
+                const ratio = (clampedTemp - 25) / 10;
+                return interpolateColor('#F59E0B', '#F97316', ratio);
+            } else {
+                const ratio = (clampedTemp - 35) / 15;
+                return interpolateColor('#F97316', '#EF4444', ratio);
+            }
+        }
+
+        function interpolateColor(color1, color2, ratio) {
+            const hex = (c) => parseInt(c.substring(1), 16);
+            const r1 = (hex(color1) >> 16) & 255;
+            const g1 = (hex(color1) >> 8) & 255;
+            const b1 = hex(color1) & 255;
+            const r2 = (hex(color2) >> 16) & 255;
+            const g2 = (hex(color2) >> 8) & 255;
+            const b2 = hex(color2) & 255;
+
+            const r = Math.round(r1 + (r2 - r1) * ratio);
+            const g = Math.round(g1 + (g2 - g1) * ratio);
+            const b = Math.round(b1 + (b2 - b1) * ratio);
+
+            return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000;
+            const φ1 = lat1 * Math.PI / 180;
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            return R * c;
+        }
+
+        function createHeatMapCircles() {
+            removeHeatMapCircles();
+
+            const nodesWithLocations = currentNodes.filter(node =>
+                NODE_LOCATIONS[node.node_id]
+            );
+
+            if (nodesWithLocations.length === 0) {
+                return;
+            }
+
+            let radius = 500;
+
+            if (nodesWithLocations.length === 2) {
+                const loc1 = NODE_LOCATIONS[nodesWithLocations[0].node_id];
+                const loc2 = NODE_LOCATIONS[nodesWithLocations[1].node_id];
+                const distance = calculateDistance(loc1.lat, loc1.lng, loc2.lat, loc2.lng);
+                radius = (distance / 2) * 1.1;
+            } else if (nodesWithLocations.length > 2) {
+                let minDistance = Infinity;
+                for (let i = 0; i < nodesWithLocations.length; i++) {
+                    for (let j = i + 1; j < nodesWithLocations.length; j++) {
+                        const loc1 = NODE_LOCATIONS[nodesWithLocations[i].node_id];
+                        const loc2 = NODE_LOCATIONS[nodesWithLocations[j].node_id];
+                        const dist = calculateDistance(loc1.lat, loc1.lng, loc2.lat, loc2.lng);
+                        minDistance = Math.min(minDistance, dist);
+                    }
+                }
+                radius = (minDistance / 2) * 1.05;
+            }
+
+            nodesWithLocations.forEach(node => {
+                const location = NODE_LOCATIONS[node.node_id];
+                const color = temperatureToColor(node.temperature);
+
+                const circle = L.circle([location.lat, location.lng], {
+                    radius: radius,
+                    fillColor: color,
+                    fillOpacity: 0.4,
+                    color: color,
+                    weight: 2,
+                    opacity: 0.6
+                }).addTo(map);
+
+                circle.bindPopup(`
+                    <div style="text-align:center;padding:5px;">
+                        <strong>${node.node_id}</strong><br>
+                        <span style="font-size:20px;color:${color};">${node.temperature.toFixed(1)}°C</span>
+                    </div>
+                `);
+
+                heatMapCircles.push(circle);
+            });
+        }
+
+        function removeHeatMapCircles() {
+            heatMapCircles.forEach(circle => map.removeLayer(circle));
+            heatMapCircles = [];
         }
 
         function toggleHeatMap() {
             if (!map) return;
 
-            try {
-                if (heatLayer) {
-                    map.removeLayer(heatLayer);
-                    heatLayer = null;
-                    document.getElementById('heatMapToggle').textContent = '🌡️ Heat Map';
-                } else {
-                    const heatData = currentNodes
-                        .filter(n => NODE_LOCATIONS[n.node_id])
-                        .map(n => {
-                            const loc = NODE_LOCATIONS[n.node_id];
-                            return [loc.lat, loc.lng, n.temperature / 40];
-                        });
+            heatMapMode = !heatMapMode;
+            const btn = document.getElementById('heatMapToggle');
 
-                    heatLayer = L.heatLayer(heatData, {
-                        radius: 50,
-                        blur: 40,
-                        maxZoom: 17,
-                        gradient: {
-                            0.0: 'blue',
-                            0.5: 'lime',
-                            0.7: 'yellow',
-                            1.0: 'red'
-                        }
-                    }).addTo(map);
+            if (heatMapMode) {
+                btn.textContent = '📍 Normal View';
 
-                    document.getElementById('heatMapToggle').textContent = '📍 Normal View';
-                }
-            } catch (error) {
-                console.error('Error toggling heat map:', error);
+                Object.values(markers).forEach(marker => {
+                    map.removeLayer(marker);
+                });
+
+                createHeatMapCircles();
+            } else {
+                btn.textContent = '🌡️ Heat Map';
+
+                removeHeatMapCircles();
+
+                Object.values(markers).forEach(marker => {
+                    map.addLayer(marker);
+                });
             }
         }
 
@@ -1092,20 +1217,18 @@
             }
         }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('Dashboard initializing...');
-            initBarometer();
+        // Initialize - Same as Pi4 GUI
+        initBarometer();
+        initMap();
 
-            setTimeout(() => {
-                initMap();
-            }, 500);
+        // Initial data load
+        updateDashboard();
 
-            updateDashboard();
-            setInterval(updateDashboard, REFRESH_INTERVAL);
+        // Refresh every 30 seconds
+        setInterval(updateDashboard, REFRESH_INTERVAL);
 
-            updateCharts('24h');
-        });
+        // Load initial charts
+        setTimeout(() => updateCharts('24h'), 1000);
     </script>
 </body>
 </html>

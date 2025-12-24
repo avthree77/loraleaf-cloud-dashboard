@@ -3,11 +3,15 @@
     {
       "route": "/live",
       "rewrite": "/live.html"
+    },
+    {
+      "route": "/packages",
+      "rewrite": "/packages.html"
     }
   ],
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/images/*.{png,jpg,gif,svg}", "/css/*.css", "/js/*.js", "/live"]
+    "exclude": ["/images/*.{png,jpg,gif,svg}", "/css/*.css", "/js/*.js", "/live", "/packages"]
   },
   "responseOverrides": {
     "404": {

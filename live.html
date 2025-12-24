@@ -723,6 +723,7 @@
         let heatMapMode = false;
         let heatMapCircles = [];
         let heatMapLegend = null;
+        let sensorIcon; // Will be created after Leaflet loads
 
         // Initialize map - Same as Pi4 GUI
         function initMap() {
@@ -733,16 +734,16 @@
                 maxZoom: 19
             }).addTo(map);
 
+            // Create sensor icon AFTER Leaflet is loaded
+            sensorIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: "<div style='background-color:#667eea;width:30px;height:30px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;'>📡</div>",
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
             console.log('Map initialized successfully');
         }
-
-        // Custom icon for sensor nodes - Same as Pi4 GUI
-        const sensorIcon = L.divIcon({
-            className: 'custom-div-icon',
-            html: "<div style='background-color:#667eea;width:30px;height:30px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;'>📡</div>",
-            iconSize: [30, 30],
-            iconAnchor: [15, 15]
-        });
 
         function updateMapMarkers(nodes) {
             if (!map) return;

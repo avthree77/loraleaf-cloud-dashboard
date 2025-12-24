@@ -1217,18 +1217,22 @@
             }
         }
 
-        // Initialize - Same as Pi4 GUI
-        initBarometer();
-        initMap();
+        // Initialize - Wait for DOM and scripts to load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard initializing...');
 
-        // Initial data load
-        updateDashboard();
+            initBarometer();
 
-        // Refresh every 30 seconds
-        setInterval(updateDashboard, REFRESH_INTERVAL);
+            // Wait a tiny bit for Leaflet to be ready
+            setTimeout(() => {
+                initMap();
+                updateDashboard();
+                setInterval(updateDashboard, REFRESH_INTERVAL);
 
-        // Load initial charts
-        setTimeout(() => updateCharts('24h'), 1000);
+                // Load charts after initial data
+                setTimeout(() => updateCharts('24h'), 1000);
+            }, 100);
+        });
     </script>
 </body>
 </html>

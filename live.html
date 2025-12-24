@@ -300,6 +300,9 @@
             flex: 1;
             border-radius: 10px;
             overflow: hidden;
+            min-height: 400px;
+            background: #f8f9fa;
+            position: relative;
         }
 
         /* Node Cards Section */
@@ -627,16 +630,31 @@
         // Initialize map
         function initMap() {
             try {
-                // Center on Cornwall, UK (approximate center of sensor network)
-                map = L.map('map').setView([50.2660, -5.0527], 15);
+                // Check if Leaflet is loaded
+                if (typeof L === 'undefined') {
+                    console.error('Leaflet library not loaded');
+                    document.getElementById('map').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #7f8c8d; padding: 20px; text-align: center;"><div>Map library loading...<br><small>Refresh if map doesn\'t appear</small></div></div>';
+                    return;
+                }
 
+                // Center on Cornwall, UK (approximate center of sensor network)
+                map = L.map('map', {
+                    center: [50.2660, -5.0527],
+                    zoom: 15,
+                    zoomControl: true
+                });
+
+                // Use OpenStreetMap tiles
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors',
-                    maxZoom: 19
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 19,
+                    minZoom: 10
                 }).addTo(map);
+
+                console.log('Map initialized successfully');
             } catch (error) {
                 console.error('Map initialization error:', error);
-                document.getElementById('map').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #e74c3c;">Map loading failed. Dashboard will continue without map.</div>';
+                document.getElementById('map').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #7f8c8d; padding: 20px; text-align: center;"><div>📍 Map unavailable<br><small>Sensor data below</small></div></div>';
             }
         }
 
@@ -1059,14 +1077,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Dashboard initializing...');
 
-            // Initialize map (non-blocking)
-            try {
-                initMap();
-            } catch (error) {
-                console.error('Map initialization failed:', error);
-            }
-
-            // Initialize dashboard data (critical)
+            // Initialize dashboard data first (critical)
             try {
                 updateDashboard();
                 setInterval(updateDashboard, REFRESH_INTERVAL);
@@ -1076,10 +1087,21 @@
 
             // Initialize datetime updates
             try {
+                updateDateTime();
                 setInterval(updateDateTime, 1000);
             } catch (error) {
                 console.error('DateTime initialization failed:', error);
             }
+
+            // Initialize map after a short delay (non-blocking)
+            setTimeout(() => {
+                try {
+                    console.log('Initializing map...');
+                    initMap();
+                } catch (error) {
+                    console.error('Map initialization failed:', error);
+                }
+            }, 500);
 
             console.log('Dashboard initialization complete');
         });

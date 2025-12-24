@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Services & Packages | LoRaLeaf</title>
+    <title>Packages & Pricing | LoRaLeaf</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/images/loraleaf-logo.svg">
@@ -35,7 +35,7 @@
         }
 
         .packages-content {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 60px 20px;
         }
@@ -47,81 +47,101 @@
         .section h2 {
             font-size: 2.5em;
             color: #667eea;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
             text-align: center;
         }
 
-        .tier-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 50px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .tier-card {
+        /* Hardware Cards */
+        .hardware-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .hardware-card {
             background: white;
             border-radius: 15px;
             padding: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             transition: transform 0.3s, box-shadow 0.3s;
             border-top: 5px solid #667eea;
+            position: relative;
         }
 
-        .tier-card:nth-child(2) {
-            border-top-color: #4ade80;
-        }
-
-        .tier-card:nth-child(3) {
-            border-top-color: #f59e0b;
-            transform: scale(1.05);
-        }
-
-        .tier-card:nth-child(4) {
-            border-top-color: #8b5cf6;
-        }
-
-        .tier-card:hover {
-            transform: translateY(-5px) scale(1.02);
+        .hardware-card:hover {
+            transform: translateY(-5px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.15);
         }
 
-        .tier-name {
+        .hardware-card.featured {
+            border-top-color: #f59e0b;
+            border-top-width: 8px;
+        }
+
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #f59e0b;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .hardware-name {
             font-size: 1.8em;
             font-weight: bold;
             color: #333;
+            margin-bottom: 5px;
+        }
+
+        .hardware-tagline {
+            font-style: italic;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .hardware-price {
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .savings {
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.1em;
             margin-bottom: 15px;
         }
 
-        .tier-price {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 10px;
+        .hardware-description {
+            color: #666;
+            line-height: 1.6;
+            margin: 20px 0;
         }
 
-        .tier-period {
-            color: #999;
-            font-size: 1.1em;
-            margin-bottom: 20px;
-        }
-
-        .tier-ideal {
-            background: #f0f9ff;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 0.9em;
-            color: #0369a1;
-            margin-bottom: 20px;
-            font-style: italic;
-        }
-
-        .tier-features {
+        .hardware-features {
             list-style: none;
             padding: 0;
             margin: 20px 0;
         }
 
-        .tier-features li {
+        .hardware-features li {
             padding: 8px 0;
             color: #555;
             display: flex;
@@ -129,74 +149,148 @@
             gap: 10px;
         }
 
-        .tier-features li:before {
+        .hardware-features li:before {
             content: "✓";
             color: #4ade80;
             font-weight: bold;
             font-size: 1.2em;
+            flex-shrink: 0;
         }
 
-        .comparison-table {
-            overflow-x: auto;
+        .best-for {
+            background: #f0f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            color: #0369a1;
+            margin: 20px 0;
+            font-style: italic;
+        }
+
+        .cta-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            text-align: center;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .cta-button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .cta-button.secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .cta-button.secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Kit Cards */
+        .kits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
             margin: 40px 0;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .kit-card {
             background: white;
-            border-radius: 10px;
-            overflow: hidden;
+            border-radius: 15px;
+            padding: 35px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 3px solid #e5e7eb;
+            position: relative;
         }
 
-        th {
+        .kit-card.popular {
+            border-color: #f59e0b;
+            border-width: 4px;
+            transform: scale(1.05);
+        }
+
+        .kit-card:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #f59e0b;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Required Item */
+        .required-item {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 20px;
-            text-align: left;
-            font-weight: 600;
+            padding: 40px;
+            border-radius: 15px;
+            margin: 40px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        td {
-            padding: 15px 20px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        tr:hover {
-            background: #f9fafb;
-        }
-
-        .checkmark {
-            color: #4ade80;
+        .required-badge {
+            background: #fbbf24;
+            color: #78350f;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
             font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
         }
 
-        .care-plan-grid {
+        /* Subscription Cards */
+        .subscription-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
         }
 
-        .care-card {
+        .sub-card {
             background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-            border-left: 4px solid #667eea;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            border-top: 5px solid #e5e7eb;
         }
 
-        .care-card h3 {
-            color: #667eea;
-            margin-bottom: 10px;
+        .sub-card.included {
+            border-top-color: #10b981;
         }
 
-        .care-price {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #333;
-            margin: 15px 0;
+        .sub-card.recommended {
+            border-top-color: #f59e0b;
+            transform: scale(1.03);
+        }
+
+        .sub-card:hover {
+            transform: translateY(-5px) scale(1.03);
         }
 
         .info-box {
@@ -207,26 +301,54 @@
             margin: 30px 0;
         }
 
-        .info-box h3 {
-            color: #92400e;
-            margin-top: 0;
-        }
-
-        .parts-table {
-            margin: 30px 0;
-        }
-
-        .custom-services {
+        .build-your-own {
             background: #f9fafb;
             padding: 40px;
             border-radius: 15px;
+            text-align: center;
             margin: 40px 0;
         }
 
-        .custom-services h3 {
+        .build-your-own h3 {
             color: #667eea;
-            font-size: 1.5em;
-            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin: 60px 0;
+        }
+
+        .cta-section h2 {
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .cta-white {
+            background: white;
+            color: #667eea;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .cta-white:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
 
         @media (max-width: 768px) {
@@ -234,12 +356,22 @@
                 font-size: 2em;
             }
 
-            .tier-card:nth-child(3) {
+            .section h2 {
+                font-size: 2em;
+            }
+
+            .hardware-grid,
+            .kits-grid,
+            .subscription-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .kit-card.popular {
                 transform: scale(1);
             }
 
-            .section h2 {
-                font-size: 2em;
+            .kit-card:hover {
+                transform: translateY(-5px) scale(1);
             }
         }
     </style>
@@ -270,477 +402,329 @@
 
     <!-- Hero -->
     <section class="packages-hero">
-        <h1>Services & Packages</h1>
-        <p>Subscription tiers, warranties, maintenance contracts, and custom development services for LoRaLeaf environmental monitoring systems</p>
+        <h1>Build Your System</h1>
+        <p>Start with a hub, add the nodes you need. All systems include free basic dashboard access.</p>
     </section>
 
     <!-- Content -->
     <div class="packages-content">
 
-        <!-- Subscription Tiers -->
+        <!-- SECTION 1: The Hub (Required) -->
         <section class="section">
-            <h2>💳 Subscription Tiers</h2>
+            <div class="required-item">
+                <span class="required-badge">⭐ REQUIRED</span>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
+                    <div>
+                        <h2 style="color: white; text-align: left; margin-bottom: 20px;">LoRaLeaf Hub</h2>
+                        <div style="font-size: 3.5em; font-weight: bold; margin-bottom: 20px;">£199</div>
+                        <p style="font-size: 1.1em; line-height: 1.6; margin-bottom: 20px;">
+                            The brain of your system - required for all setups
+                        </p>
+                        <ul class="hardware-features" style="color: white;">
+                            <li>Raspberry Pi 4 with 7" touchscreen display</li>
+                            <li>Built-in LoRa receiver (10km range)</li>
+                            <li>Indoor temperature, humidity & pressure sensor (BME280)</li>
+                            <li>Uploads to Azure cloud - access your data anywhere</li>
+                            <li>Local display shows all readings at a glance</li>
+                            <li>Power supply included</li>
+                        </ul>
+                    </div>
+                    <div style="text-align: center;">
+                        <a href="mailto:info@loraleaf.com?subject=LoRaLeaf Hub Enquiry" class="cta-white">Enquire Now</a>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-            <div class="tier-grid">
-                <!-- Free Tier -->
-                <div class="tier-card">
-                    <div class="tier-name">Free Tier</div>
-                    <div class="tier-price">£0</div>
-                    <div class="tier-period">Included with hardware</div>
-                    <div class="tier-ideal">Perfect for: Getting started</div>
-                    <ul class="tier-features">
-                        <li>Basic web dashboard access</li>
-                        <li>Real-time readings from all nodes</li>
+        <!-- SECTION 2: Starter Kits (Recommended) -->
+        <section class="section">
+            <h2>🎁 Starter Kits (Recommended)</h2>
+            <p class="section-subtitle">Complete systems ready to deploy. Best value for money.</p>
+
+            <div class="kits-grid">
+                <!-- Garden Starter -->
+                <div class="kit-card">
+                    <div class="hardware-name">Garden Starter</div>
+                    <div class="hardware-price">£249</div>
+                    <div class="savings">Save £29</div>
+                    <ul class="hardware-features">
+                        <li>1× LoRaLeaf Hub</li>
+                        <li>1× WiFi Node</li>
+                        <li>Free Basic subscription included</li>
+                    </ul>
+                    <div class="best-for">Perfect for: Getting started, single growing area</div>
+                    <a href="mailto:info@loraleaf.com?subject=Garden Starter Kit Enquiry" class="cta-button">Enquire Now</a>
+                </div>
+
+                <!-- Garden Plus -->
+                <div class="kit-card">
+                    <div class="hardware-name">Garden Plus</div>
+                    <div class="hardware-price">£299</div>
+                    <div class="savings">Save £58</div>
+                    <ul class="hardware-features">
+                        <li>1× LoRaLeaf Hub</li>
+                        <li>2× WiFi Nodes</li>
+                        <li>Free Basic subscription included</li>
+                    </ul>
+                    <div class="best-for">Perfect for: Front & back garden, greenhouse + garden</div>
+                    <a href="mailto:info@loraleaf.com?subject=Garden Plus Kit Enquiry" class="cta-button">Enquire Now</a>
+                </div>
+
+                <!-- Estate Starter (Most Popular) -->
+                <div class="kit-card popular">
+                    <div class="popular-badge">⭐ MOST POPULAR</div>
+                    <div class="hardware-name">Estate Starter</div>
+                    <div class="hardware-price">£499</div>
+                    <div class="savings">Save £87</div>
+                    <ul class="hardware-features">
+                        <li>1× LoRaLeaf Hub</li>
+                        <li>3× LoRa Nodes</li>
+                        <li>Free Basic subscription included</li>
+                    </ul>
+                    <div class="best-for">Perfect for: Large gardens, smallholdings, vineyards</div>
+                    <a href="mailto:info@loraleaf.com?subject=Estate Starter Kit Enquiry" class="cta-button">Enquire Now</a>
+                </div>
+
+                <!-- Estate Pro -->
+                <div class="kit-card">
+                    <div class="hardware-name">Estate Pro</div>
+                    <div class="hardware-price">£749</div>
+                    <div class="savings">Save £95</div>
+                    <ul class="hardware-features">
+                        <li>1× LoRaLeaf Hub</li>
+                        <li>5× LoRa Nodes</li>
+                        <li>Free Basic subscription included</li>
+                    </ul>
+                    <div class="best-for">Perfect for: Estates, market gardens, orchards</div>
+                    <a href="mailto:info@loraleaf.com?subject=Estate Pro Kit Enquiry" class="cta-button">Enquire Now</a>
+                </div>
+
+                <!-- Research Kit -->
+                <div class="kit-card">
+                    <div class="hardware-name">Research Kit</div>
+                    <div class="hardware-price">£1,299</div>
+                    <div class="savings">Save £190</div>
+                    <ul class="hardware-features">
+                        <li>1× LoRaLeaf Hub</li>
+                        <li>10× LoRa Nodes</li>
+                        <li>Free Basic subscription included</li>
+                    </ul>
+                    <div class="best-for">Perfect for: Institutions, botanic gardens, large deployments</div>
+                    <a href="mailto:info@loraleaf.com?subject=Research Kit Enquiry" class="cta-button">Enquire Now</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Individual Sensor Nodes -->
+        <section class="section">
+            <h2>📡 Individual Sensor Nodes</h2>
+            <p class="section-subtitle">Add nodes to expand your system or build a custom configuration</p>
+
+            <div class="hardware-grid">
+                <!-- WiFi Node -->
+                <div class="hardware-card">
+                    <div class="hardware-tagline">"Back Garden"</div>
+                    <div class="hardware-name">WiFi Node</div>
+                    <div class="hardware-price">£79</div>
+                    <ul class="hardware-features">
+                        <li>Temperature, humidity & pressure (BME280)</li>
+                        <li>Solar powered with dual 18650 batteries</li>
+                        <li>Connects direct to your home WiFi</li>
+                        <li>Range: ~50m from router</li>
+                    </ul>
+                    <div class="best-for">Best for: Greenhouses, patios, small gardens</div>
+                    <a href="mailto:info@loraleaf.com?subject=WiFi Node Enquiry" class="cta-button">Enquire Now</a>
+                </div>
+
+                <!-- LoRa Node -->
+                <div class="hardware-card">
+                    <div class="hardware-tagline">"Big Garden"</div>
+                    <div class="hardware-name">LoRa Node</div>
+                    <div class="hardware-price">£129</div>
+                    <ul class="hardware-features">
+                        <li>Temperature, humidity & pressure (BME280)</li>
+                        <li>Solar powered with 18650 battery</li>
+                        <li>Connects to hub via LoRa radio</li>
+                        <li>Range: up to 10km</li>
+                    </ul>
+                    <div class="best-for">Best for: Large gardens, orchards, outbuildings, fields</div>
+                    <a href="mailto:info@loraleaf.com?subject=LoRa Node Enquiry" class="cta-button">Enquire Now</a>
+                </div>
+
+                <!-- LoRa + Light -->
+                <div class="hardware-card">
+                    <div class="hardware-tagline">"Grower"</div>
+                    <div class="hardware-name">LoRa Node + Light Sensor</div>
+                    <div class="hardware-price">£149</div>
+                    <ul class="hardware-features">
+                        <li>Everything in LoRa Node, plus:</li>
+                        <li>Ambient light level monitoring (lux)</li>
+                        <li>Track sun exposure across your site</li>
+                    </ul>
+                    <div class="best-for">Best for: Growing areas, polytunnels, light mapping</div>
+                    <a href="mailto:info@loraleaf.com?subject=LoRa+Light Node Enquiry" class="cta-button">Enquire Now</a>
+                </div>
+
+                <!-- LoRa + Soil -->
+                <div class="hardware-card">
+                    <div class="hardware-tagline">"Cultivator"</div>
+                    <div class="hardware-name">LoRa Node + Soil Sensor</div>
+                    <div class="hardware-price">£159</div>
+                    <ul class="hardware-features">
+                        <li>Everything in LoRa Node, plus:</li>
+                        <li>Capacitive soil moisture sensor</li>
+                        <li>Know exactly when to water</li>
+                    </ul>
+                    <div class="best-for">Best for: Vegetable gardens, vineyards, market gardens</div>
+                    <a href="mailto:info@loraleaf.com?subject=LoRa+Soil Node Enquiry" class="cta-button">Enquire Now</a>
+                </div>
+
+                <!-- LoRa Weather Station -->
+                <div class="hardware-card">
+                    <span class="badge">Coming Soon</span>
+                    <div class="hardware-tagline">"Full Weather"</div>
+                    <div class="hardware-name">LoRa Weather Station</div>
+                    <div class="hardware-price">£249</div>
+                    <ul class="hardware-features">
+                        <li>Everything in LoRa Node, plus:</li>
+                        <li>Wind speed & direction</li>
+                        <li>Rain gauge</li>
+                        <li>Complete weather monitoring</li>
+                    </ul>
+                    <div class="best-for">Best for: Estates, farms, serious weather monitoring</div>
+                    <a href="mailto:info@loraleaf.com?subject=Weather Station Enquiry" class="cta-button secondary">Register Interest</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Build Your Own -->
+        <div class="build-your-own">
+            <h3>🔧 Build Your Own Configuration</h3>
+            <p style="font-size: 1.1em; color: #666; max-width: 800px; margin: 20px auto;">
+                Need a custom configuration? Start with a Hub (£199), add WiFi Nodes (£79 each) or LoRa Nodes (£129 each),
+                plus any specialist sensors you need.
+            </p>
+            <a href="mailto:info@loraleaf.com?subject=Custom Configuration Enquiry" class="cta-button" style="max-width: 300px; margin: 20px auto;">Contact Us</a>
+        </div>
+
+        <!-- SECTION 4: Subscriptions (Add-on Services) -->
+        <section class="section">
+            <h2>🧠 Smart Features (Optional)</h2>
+            <p class="section-subtitle">All hardware includes free Basic access. Upgrade for smart alerts, advice, and analytics.</p>
+
+            <div class="subscription-grid">
+                <!-- Free -->
+                <div class="sub-card included">
+                    <div class="hardware-name">Free</div>
+                    <div class="hardware-price">£0<span style="font-size: 0.4em;">/year</span></div>
+                    <p style="font-style: italic; color: #10b981; margin-bottom: 20px;">Included with all hardware</p>
+                    <ul class="hardware-features">
+                        <li>Real-time dashboard</li>
                         <li>7-day historical data</li>
-                        <li>Manual CSV data export</li>
                         <li>Basic alerts (node offline, low battery)</li>
+                        <li>Manual data export</li>
+                        <li>1 user</li>
                     </ul>
                 </div>
 
                 <!-- Grower -->
-                <div class="tier-card">
-                    <div class="tier-name">Grower</div>
-                    <div class="tier-price">£50<span style="font-size: 0.4em;">/year</span></div>
-                    <div class="tier-period">or £5/month</div>
-                    <div class="tier-ideal">Perfect for: Allotment holders, keen gardeners, smallholders</div>
-                    <ul class="tier-features">
-                        <li>Everything in Free, plus:</li>
-                        <li>Unlimited historical data storage</li>
-                        <li>SMS & email frost alerts</li>
-                        <li>"Gardener's Friend" planting advice</li>
-                        <li>Growing Degree Days tracking</li>
+                <div class="sub-card recommended">
+                    <div class="hardware-name">Grower</div>
+                    <div class="hardware-price">£50<span style="font-size: 0.4em;">/year</span></div>
+                    <p style="color: #999; margin-bottom: 20px;">or £5/month</p>
+                    <p style="font-style: italic; color: #f59e0b; margin-bottom: 20px; font-weight: 600;">
+                        "Your garden assistant - know when to plant, water, and protect"
+                    </p>
+                    <p style="margin-bottom: 15px; color: #666;">Everything in Free, plus:</p>
+                    <ul class="hardware-features">
+                        <li>Unlimited historical data</li>
+                        <li>Frost alerts (SMS & email)</li>
+                        <li><strong>Gardener's Friend</strong> planting advice</li>
+                        <li>Growing degree days tracking</li>
                         <li>Watering reminders</li>
                     </ul>
+                    <a href="mailto:info@loraleaf.com?subject=Grower Subscription Enquiry" class="cta-button" style="margin-top: 20px;">Subscribe</a>
                 </div>
 
-                <!-- Professional (Highlighted) -->
-                <div class="tier-card">
-                    <div class="tier-name">Professional</div>
-                    <div class="tier-price">£150<span style="font-size: 0.4em;">/year</span></div>
-                    <div class="tier-period">or £15/month</div>
-                    <div class="tier-ideal">Perfect for: Market gardeners, vineyards, estates</div>
-                    <ul class="tier-features">
-                        <li>Everything in Grower, plus:</li>
-                        <li>Fog detection & alerts</li>
-                        <li>Disease risk modelling (blight, mildew)</li>
-                        <li>Harvest decision support</li>
-                        <li>API access (REST, JSON)</li>
-                        <li>Custom threshold alerts</li>
-                        <li>Up to 5 user logins</li>
+                <!-- Professional -->
+                <div class="sub-card">
+                    <div class="hardware-name">Professional</div>
+                    <div class="hardware-price">£150<span style="font-size: 0.4em;">/year</span></div>
+                    <p style="color: #999; margin-bottom: 20px;">or £15/month</p>
+                    <p style="font-style: italic; color: #667eea; margin-bottom: 20px; font-weight: 600;">
+                        "For serious growers - predict problems before they happen"
+                    </p>
+                    <p style="margin-bottom: 15px; color: #666;">Everything in Grower, plus:</p>
+                    <ul class="hardware-features">
+                        <li><strong>Fog detection</strong> & alerts</li>
+                        <li><strong>Disease risk</strong> warnings (blight, mildew)</li>
+                        <li>Harvest window predictions</li>
+                        <li>Custom alert thresholds</li>
+                        <li>API access</li>
+                        <li>5 users</li>
                     </ul>
+                    <a href="mailto:info@loraleaf.com?subject=Professional Subscription Enquiry" class="cta-button" style="margin-top: 20px;">Subscribe</a>
                 </div>
 
                 <!-- Enterprise -->
-                <div class="tier-card">
-                    <div class="tier-name">Enterprise</div>
-                    <div class="tier-price">£500<span style="font-size: 0.4em;">/year</span></div>
-                    <div class="tier-period">or £50/month</div>
-                    <div class="tier-ideal">Perfect for: Research institutions, botanic gardens, large estates</div>
-                    <ul class="tier-features">
-                        <li>Everything in Professional, plus:</li>
-                        <li>Custom algorithms & models</li>
-                        <li>White-label options</li>
-                        <li>Priority support (4hr response)</li>
-                        <li>MQTT & advanced integration</li>
+                <div class="sub-card">
+                    <div class="hardware-name">Enterprise</div>
+                    <div class="hardware-price">£500<span style="font-size: 0.4em;">/year</span></div>
+                    <p style="color: #999; margin-bottom: 20px;">or £50/month</p>
+                    <p style="font-style: italic; color: #8b5cf6; margin-bottom: 20px; font-weight: 600;">
+                        "For institutions and commercial operations"
+                    </p>
+                    <p style="margin-bottom: 15px; color: #666;">Everything in Professional, plus:</p>
+                    <ul class="hardware-features">
+                        <li>Custom algorithms for your needs</li>
+                        <li>White-label dashboard option</li>
+                        <li>Priority support (4-hour response)</li>
                         <li>Unlimited users</li>
-                        <li>99.5% uptime SLA</li>
+                        <li>SLA guarantee</li>
                     </ul>
-                </div>
-            </div>
-
-            <!-- Comparison Table -->
-            <div class="comparison-table">
-                <h3 style="text-align: center; margin: 40px 0 20px;">Feature Comparison</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Feature</th>
-                            <th>Free</th>
-                            <th>Grower<br>£50/yr</th>
-                            <th>Professional<br>£150/yr</th>
-                            <th>Enterprise<br>£500/yr</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Real-time dashboard</td>
-                            <td class="checkmark">✓</td>
-                            <td class="checkmark">✓</td>
-                            <td class="checkmark">✓</td>
-                            <td class="checkmark">✓</td>
-                        </tr>
-                        <tr>
-                            <td>Historical data</td>
-                            <td>7 days</td>
-                            <td>Unlimited</td>
-                            <td>Unlimited</td>
-                            <td>Unlimited</td>
-                        </tr>
-                        <tr>
-                            <td>SMS/Email alerts</td>
-                            <td>-</td>
-                            <td class="checkmark">✓</td>
-                            <td class="checkmark">✓</td>
-                            <td class="checkmark">✓</td>
-                        </tr>
-                        <tr>
-                            <td>Gardener's Friend advice</td>
-                            <td>-</td>
-                            <td class="checkmark">✓</td>
-                            <td class="checkmark">✓</td>
-                            <td class="checkmark">✓</td>
-                        </tr>
-                        <tr>
-                            <td>Growing Degree Days</td>
-                            <td>-</td>
-                            <td class="checkmark">✓</td>
-                            <td class="checkmark">✓</td>
-                            <td class="checkmark">✓</td>
-                        </tr>
-                        <tr>
-                            <td>Fog detection</td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td class="checkmark">✓</td>
-                            <td class="checkmark">✓</td>
-                        </tr>
-                        <tr>
-                            <td>Disease risk modelling</td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td class="checkmark">✓</td>
-                            <td class="checkmark">✓</td>
-                        </tr>
-                        <tr>
-                            <td>API access</td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td class="checkmark">✓</td>
-                            <td class="checkmark">✓</td>
-                        </tr>
-                        <tr>
-                            <td>Custom algorithms</td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td class="checkmark">✓</td>
-                        </tr>
-                        <tr>
-                            <td>Number of users</td>
-                            <td>1</td>
-                            <td>1</td>
-                            <td>5</td>
-                            <td>Unlimited</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Warranty -->
-        <section class="section">
-            <h2>🛡️ Warranty Options</h2>
-
-            <div class="care-plan-grid">
-                <div class="care-card">
-                    <h3>Standard Warranty</h3>
-                    <div class="care-price">Included</div>
-                    <p><strong>12 months from purchase</strong></p>
-                    <ul class="tier-features">
-                        <li>Manufacturing defects</li>
-                        <li>Component failure</li>
-                        <li>Software/firmware bugs</li>
-                        <li>48hr response time</li>
-                        <li>5-day replacement shipping</li>
-                    </ul>
-                </div>
-
-                <div class="care-card">
-                    <h3>Extended Warranty</h3>
-                    <div class="care-price">£25/year</div>
-                    <p><strong>Per node (£40 for hub)</strong></p>
-                    <ul class="tier-features">
-                        <li>Everything in Standard, plus:</li>
-                        <li>Accidental damage cover</li>
-                        <li>48hr priority replacement</li>
-                        <li>Battery replacement (if <70%)</li>
-                        <li>Solar panel replacement (if <80%)</li>
-                    </ul>
+                    <a href="mailto:info@loraleaf.com?subject=Enterprise Subscription Enquiry" class="cta-button" style="margin-top: 20px;">Subscribe</a>
                 </div>
             </div>
         </section>
 
-        <!-- Care Plans -->
+        <!-- SECTION 5: Support & Care -->
         <section class="section">
-            <h2>🔧 Maintenance & Care Plans</h2>
+            <h2>🛠️ Support & Maintenance</h2>
 
-            <div class="care-plan-grid">
-                <div class="care-card">
-                    <h3>Self-Service</h3>
-                    <div class="care-price">£0</div>
-                    <ul class="tier-features">
-                        <li>Online documentation</li>
-                        <li>Community forum support</li>
-                        <li>Replacement parts available</li>
-                    </ul>
+            <div class="hardware-grid" style="max-width: 900px; margin: 0 auto;">
+                <div class="hardware-card">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">Warranty</h3>
+                    <p><strong>Standard (Included):</strong> 12 months, manufacturing defects</p>
+                    <p style="margin-top: 10px;"><strong>Extended:</strong> £25/node/year - covers accidental damage, battery replacement</p>
                 </div>
 
-                <div class="care-card">
-                    <h3>Care Plan - Remote</h3>
-                    <div class="care-price">£75/year</div>
-                    <p>Up to 5 nodes + hub</p>
-                    <ul class="tier-features">
-                        <li>Proactive monitoring</li>
-                        <li>Annual health check report</li>
-                        <li>Remote firmware updates</li>
-                        <li>Priority email support</li>
-                        <li>20% discount on parts</li>
-                    </ul>
-                </div>
-
-                <div class="care-card">
-                    <h3>Care Plan - On-Site</h3>
-                    <div class="care-price">£150/year</div>
-                    <p>Up to 5 nodes + hub + travel</p>
-                    <ul class="tier-features">
-                        <li>Everything in Remote, plus:</li>
-                        <li>1 annual site visit included</li>
-                        <li>Physical inspection</li>
-                        <li>Solar panel cleaning</li>
-                        <li>Written report with photos</li>
-                    </ul>
-                </div>
-
-                <div class="care-card">
-                    <h3>Fully Managed</h3>
-                    <div class="care-price">£500/year</div>
-                    <p>Up to 10 nodes + hub</p>
-                    <ul class="tier-features">
-                        <li>Everything in On-Site, plus:</li>
-                        <li>2 site visits/year</li>
-                        <li>All replacement parts included</li>
-                        <li>Emergency call-out</li>
-                        <li>Spare node on standby</li>
-                        <li>Named account manager</li>
-                    </ul>
+                <div class="hardware-card">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">Care Plans</h3>
+                    <p><strong>Remote Care - £75/year:</strong> Proactive monitoring, health reports, 20% off parts</p>
+                    <p style="margin-top: 10px;"><strong>On-Site Care - £150/year:</strong> Annual visit, inspection, cleaning</p>
+                    <p style="margin-top: 10px;"><strong>Fully Managed - £500/year:</strong> Everything included, emergency call-outs</p>
                 </div>
             </div>
+        </section>
 
-            <div class="info-box">
-                <h3>🚗 Travel Charges (On-Site Plans)</h3>
-                <p>
-                    <strong>Within 30 miles of Carbis Bay:</strong> Included<br>
-                    <strong>30-60 miles:</strong> £25<br>
-                    <strong>60-100 miles:</strong> £50<br>
-                    <strong>Over 100 miles:</strong> £75 or quote
+        <!-- CTA Section -->
+        <div class="cta-section">
+            <h2>Not sure what you need?</h2>
+            <p style="font-size: 1.2em; max-width: 700px; margin: 20px auto;">
+                Every site is different. Tell us about your garden, estate, or project and we'll recommend the right setup.
+            </p>
+            <div class="cta-buttons">
+                <a href="mailto:info@loraleaf.com?subject=System Recommendation Request" class="cta-white">Get a Recommendation</a>
+            </div>
+
+            <div style="margin-top: 60px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.3);">
+                <h3 style="color: white; font-size: 1.5em; margin-bottom: 15px;">Institutional Enquiries</h3>
+                <p style="font-size: 1.1em; max-width: 700px; margin: 0 auto 25px;">
+                    Universities, botanic gardens, and research institutions - ask about our pilot programmes and educational pricing.
                 </p>
+                <a href="mailto:info@loraleaf.com?subject=Institutional Enquiry" class="cta-white">Institutional Enquiries</a>
             </div>
-        </section>
-
-        <!-- Replacement Parts -->
-        <section class="section">
-            <h2>🔩 Replacement Parts Pricing</h2>
-
-            <div class="comparison-table parts-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Part</th>
-                            <th>Standard Price</th>
-                            <th>Care Plan Price (-20%)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>18650 Battery (single)</td>
-                            <td>£5</td>
-                            <td>£4</td>
-                        </tr>
-                        <tr>
-                            <td>18650 Battery (pair)</td>
-                            <td>£9</td>
-                            <td>£7</td>
-                        </tr>
-                        <tr>
-                            <td>Solar panel (node)</td>
-                            <td>£12</td>
-                            <td>£10</td>
-                        </tr>
-                        <tr>
-                            <td>BME280 sensor</td>
-                            <td>£8</td>
-                            <td>£6</td>
-                        </tr>
-                        <tr>
-                            <td>Soil moisture sensor</td>
-                            <td>£10</td>
-                            <td>£8</td>
-                        </tr>
-                        <tr>
-                            <td>LoRa antenna</td>
-                            <td>£8</td>
-                            <td>£6</td>
-                        </tr>
-                        <tr>
-                            <td>Node housing (complete)</td>
-                            <td>£25</td>
-                            <td>£20</td>
-                        </tr>
-                        <tr>
-                            <td>Pico + LoRa module</td>
-                            <td>£28</td>
-                            <td>£22</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Custom Development -->
-        <section class="section">
-            <h2>💻 Custom Development Services</h2>
-
-            <div class="custom-services">
-                <h3>Algorithm Development</h3>
-                <table>
-                    <tr>
-                        <td>Simple alert logic</td>
-                        <td><strong>£100-200</strong></td>
-                        <td>Example: "Alert when X AND Y for Z hours"</td>
-                    </tr>
-                    <tr>
-                        <td>Crop-specific model</td>
-                        <td><strong>£300-500</strong></td>
-                        <td>Example: Blight risk tuned for your location</td>
-                    </tr>
-                    <tr>
-                        <td>Complex algorithm</td>
-                        <td><strong>£500-1000</strong></td>
-                        <td>Example: Harvest prediction with historical data</td>
-                    </tr>
-                </table>
-            </div>
-
-            <div class="custom-services">
-                <h3>Integration Services</h3>
-                <table>
-                    <tr>
-                        <td>Third-party API connection</td>
-                        <td><strong>£200-400</strong></td>
-                        <td>Push data to your existing system</td>
-                    </tr>
-                    <tr>
-                        <td>Database integration</td>
-                        <td><strong>£300-600</strong></td>
-                        <td>Write to your SQL/research database</td>
-                    </tr>
-                    <tr>
-                        <td>MQTT/IoT setup</td>
-                        <td><strong>£150-300</strong></td>
-                        <td>Connect to Home Assistant, etc.</td>
-                    </tr>
-                </table>
-            </div>
-
-            <div class="custom-services">
-                <h3>Consultancy & Training</h3>
-                <table>
-                    <tr>
-                        <td>On-site consultation</td>
-                        <td><strong>£150/day + travel</strong></td>
-                        <td>System design and planning</td>
-                    </tr>
-                    <tr>
-                        <td>Remote consultation</td>
-                        <td><strong>£75/half day</strong></td>
-                        <td>Video call support</td>
-                    </tr>
-                    <tr>
-                        <td>Remote training (1-2 people)</td>
-                        <td><strong>£50</strong></td>
-                        <td>1 hour video call</td>
-                    </tr>
-                    <tr>
-                        <td>"Build Your Own Node" workshop</td>
-                        <td><strong>£300/half day</strong></td>
-                        <td>Educational, we provide kits</td>
-                    </tr>
-                    <tr>
-                        <td>School/college session</td>
-                        <td><strong>£150/session</strong></td>
-                        <td>Discounted for education</td>
-                    </tr>
-                </table>
-            </div>
-        </section>
-
-        <!-- Institutional Packages -->
-        <section class="section">
-            <h2>🎓 Institutional Packages</h2>
-
-            <div class="tier-grid">
-                <div class="tier-card">
-                    <div class="tier-name">Pilot Package</div>
-                    <div class="tier-price">At cost</div>
-                    <div class="tier-ideal">Perfect for: Eden Project, Cambridge Botanic Garden, universities</div>
-                    <ul class="tier-features">
-                        <li>3-5 nodes + hub (heavily discounted)</li>
-                        <li>3-month trial period</li>
-                        <li>Professional subscription included</li>
-                        <li>Weekly check-in calls</li>
-                        <li>Full data export at end</li>
-                        <li>No obligation to continue</li>
-                        <li>Cost credited if proceeding</li>
-                    </ul>
-                </div>
-
-                <div class="tier-card">
-                    <div class="tier-name">Research Partnership</div>
-                    <div class="tier-price">Negotiated</div>
-                    <div class="tier-ideal">For universities and research institutions</div>
-                    <ul class="tier-features">
-                        <li>Discounted hardware (educational pricing)</li>
-                        <li>Free Enterprise subscription</li>
-                        <li>Co-development of algorithms</li>
-                        <li>Joint publication opportunities</li>
-                        <li>Student project support</li>
-                        <li>Named as development partner</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <!-- Gardener's Friend Feature Detail -->
-        <section class="section">
-            <h2>🌱 "Gardener's Friend" Feature Detail</h2>
-
-            <div class="info-box" style="background: #dcfce7; border-left-color: #10b981;">
-                <h3 style="color: #065f46;">Planting Guidance (Grower tier+)</h3>
-                <p><strong>Example notifications:</strong></p>
-                <ul>
-                    <li>"Soil temp 8°C for 5 days - direct sow peas, carrots, onions"</li>
-                    <li>"Frost risk still 30% - keep tender plants protected"</li>
-                    <li>"Warm spell coming - good week to plant out brassicas"</li>
-                </ul>
-            </div>
-
-            <div class="info-box" style="background: #dbeafe; border-left-color: #3b82f6;">
-                <h3 style="color: #1e40af;">Watering Guidance (Grower tier+)</h3>
-                <p><strong>Example notifications:</strong></p>
-                <ul>
-                    <li>"High evapotranspiration + no rain = water deeply today"</li>
-                    <li>"Rain forecast Thursday - hold off watering"</li>
-                    <li>"Soil moisture 25% - below optimal for tomatoes"</li>
-                </ul>
-            </div>
-
-            <div class="info-box" style="background: #fce7f3; border-left-color: #ec4899;">
-                <h3 style="color: #9f1239;">Disease Risk (Professional tier+)</h3>
-                <p><strong>Blight (Smith Period):</strong> "Smith Period detected - blight risk HIGH - spray within 24hrs"</p>
-                <p><strong>Downy Mildew:</strong> "Downy mildew risk elevated - inspect vines/roses"</p>
-                <p><strong>Botrytis:</strong> "Botrytis risk high - increase ventilation if possible"</p>
-            </div>
-        </section>
+        </div>
 
     </div>
 

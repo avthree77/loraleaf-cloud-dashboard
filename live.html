@@ -1192,10 +1192,16 @@
 
         // Main update function
         async function updateDashboard() {
+            console.log('Fetching data from:', API_URL);
             try {
                 const response = await fetch(API_URL);
+                console.log('Response status:', response.status);
+
                 const data = await response.json();
+                console.log('Data received:', data);
+
                 currentNodes = data.nodes;
+                console.log('Number of nodes:', currentNodes.length);
 
                 currentNodes.sort((a, b) => a.node_id.localeCompare(b.node_id));
 
@@ -1204,34 +1210,65 @@
                     n.node_id !== 'NODE_WIFI' &&
                     n.node_id !== 'NODE_INDOORS'
                 );
+                console.log('Active nodes for barometer:', activeNodes.length);
 
                 if (activeNodes.length > 0) {
                     const avgPressure = activeNodes.reduce((sum, n) => sum + n.pressure, 0) / activeNodes.length;
+                    console.log('Average pressure:', avgPressure);
                     updateBarometer(avgPressure);
                 }
 
+                console.log('Updating map markers...');
                 updateMapMarkers(currentNodes);
+
+                console.log('Updating alerts...');
                 updateAlerts(currentNodes);
+
+                console.log('Updating node cards...');
                 updateNodes(currentNodes);
+
+                console.log('Dashboard update complete!');
             } catch (error) {
-                console.error('Error updating dashboard:', error);
+                console.error('ERROR updating dashboard:', error);
+                console.error('Error details:', error.message, error.stack);
             }
         }
 
         // Initialize - Wait for DOM and scripts to load
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Dashboard initializing...');
+            console.log('=== Dashboard initializing ===');
+            console.log('Leaflet available?', typeof L !== 'undefined');
+            console.log('Chart available?', typeof Chart !== 'undefined');
 
-            initBarometer();
+            try {
+                console.log('Initializing barometer...');
+                initBarometer();
+                console.log('Barometer initialized');
+            } catch (e) {
+                console.error('Barometer init failed:', e);
+            }
 
             // Wait a tiny bit for Leaflet to be ready
             setTimeout(() => {
-                initMap();
-                updateDashboard();
-                setInterval(updateDashboard, REFRESH_INTERVAL);
+                try {
+                    console.log('Initializing map...');
+                    initMap();
+                    console.log('Map initialized');
 
-                // Load charts after initial data
-                setTimeout(() => updateCharts('24h'), 1000);
+                    console.log('Starting initial dashboard update...');
+                    updateDashboard();
+
+                    console.log('Setting up refresh interval...');
+                    setInterval(updateDashboard, REFRESH_INTERVAL);
+
+                    // Load charts after initial data
+                    setTimeout(() => {
+                        console.log('Loading charts...');
+                        updateCharts('24h');
+                    }, 1000);
+                } catch (e) {
+                    console.error('Initialization failed:', e);
+                }
             }, 100);
         });
     </script>

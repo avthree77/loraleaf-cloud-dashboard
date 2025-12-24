@@ -3,10 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LoRaLeaf Sensor Network</title>
+    <title>Live Dashboard | LoRaLeaf Sensor Network</title>
+
+    <!-- Main Site Styles -->
+    <link rel="stylesheet" href="/css/style.css">
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+
+    <!-- Main Site Scripts -->
+    <script src="/js/main.js"></script>
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -23,6 +29,10 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            padding: 0;
+        }
+
+        .dashboard-container {
             padding: 20px;
         }
 
@@ -432,6 +442,48 @@
             margin-top: 15px;
         }
 
+        /* Average Readings */
+        .average-readings {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .average-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .average-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .average-item {
+            text-align: center;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .average-label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .average-value {
+            display: block;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
         @media (max-width: 1200px) {
             .top-grid {
                 grid-template-columns: 1fr;
@@ -444,11 +496,37 @@
             .alerts-container {
                 grid-template-columns: 1fr;
             }
+
+            .average-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <img src="/images/loraleaf-logo.svg" alt="LoRaLeaf Logo" class="logo">
+            </div>
+            <div class="nav-links">
+                <a href="/#features">Features</a>
+                <a href="/#how-it-works">How It Works</a>
+                <a href="/#use-cases">Use Cases</a>
+                <a href="/packages">Packages</a>
+                <a href="/live" class="btn-secondary">Live Data</a>
+                <a href="mailto:info@loraleaf.com" class="btn-primary">Get in Touch</a>
+            </div>
+            <div class="mobile-menu-toggle" id="mobileMenuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
         <h1>📡 LoRaLeaf Sensor Network</h1>
 
         <!-- Top Grid: Barometer + Map -->
@@ -506,6 +584,25 @@
 
                         <div class="condition-text" id="condition-description">
                             Loading barometer data...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Average Readings -->
+                <div class="average-readings">
+                    <div class="average-title">📊 Average (NODE_01 + NODE_02)</div>
+                    <div class="average-grid">
+                        <div class="average-item">
+                            <span class="average-label">🌡️ Temperature</span>
+                            <span class="average-value temp" id="avg-temp">--°C</span>
+                        </div>
+                        <div class="average-item">
+                            <span class="average-label">💧 Humidity</span>
+                            <span class="average-value humidity" id="avg-humidity">--%</span>
+                        </div>
+                        <div class="average-item">
+                            <span class="average-label">🔽 Pressure</span>
+                            <span class="average-value pressure" id="avg-pressure">-- hPa</span>
                         </div>
                     </div>
                 </div>
@@ -1326,10 +1423,39 @@
                 console.log('Updating node cards...');
                 updateNodes(currentNodes);
 
+                console.log('Updating average readings...');
+                updateAverageReadings(currentNodes);
+
                 console.log('Dashboard update complete!');
             } catch (error) {
                 console.error('ERROR updating dashboard:', error);
                 console.error('Error details:', error.message, error.stack);
+            }
+        }
+
+        // Update average readings for NODE_01 and NODE_02
+        function updateAverageReadings(nodes) {
+            const node01 = nodes.find(n => n.node_id === 'NODE_01');
+            const node02 = nodes.find(n => n.node_id === 'NODE_02');
+
+            if (node01 && node02 &&
+                node01.seconds_since_update < INACTIVE_THRESHOLD &&
+                node02.seconds_since_update < INACTIVE_THRESHOLD) {
+
+                const avgTemp = (node01.temperature + node02.temperature) / 2;
+                const avgHumidity = (node01.humidity + node02.humidity) / 2;
+                const avgPressure = (node01.pressure + node02.pressure) / 2;
+
+                document.getElementById('avg-temp').textContent = avgTemp.toFixed(1) + '°C';
+                document.getElementById('avg-humidity').textContent = avgHumidity.toFixed(1) + '%';
+                document.getElementById('avg-pressure').textContent = avgPressure.toFixed(1) + ' hPa';
+
+                console.log('Average readings updated:', { avgTemp, avgHumidity, avgPressure });
+            } else {
+                document.getElementById('avg-temp').textContent = '--°C';
+                document.getElementById('avg-humidity').textContent = '--%';
+                document.getElementById('avg-pressure').textContent = '-- hPa';
+                console.log('Average readings unavailable (nodes offline or missing)');
             }
         }
 

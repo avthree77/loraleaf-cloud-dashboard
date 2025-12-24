@@ -626,50 +626,61 @@
 
         // Initialize map
         function initMap() {
-            // Center on Cornwall, UK (approximate center of sensor network)
-            map = L.map('map').setView([50.2660, -5.0527], 15);
+            try {
+                // Center on Cornwall, UK (approximate center of sensor network)
+                map = L.map('map').setView([50.2660, -5.0527], 15);
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors',
-                maxZoom: 19
-            }).addTo(map);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+            } catch (error) {
+                console.error('Map initialization error:', error);
+                document.getElementById('map').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #e74c3c;">Map loading failed. Dashboard will continue without map.</div>';
+            }
         }
 
         // Add node markers to map
         function updateMapMarkers(nodes) {
-            // Clear existing markers
-            map.eachLayer((layer) => {
-                if (layer instanceof L.Marker) {
-                    map.removeLayer(layer);
-                }
-            });
+            if (!map) return; // Skip if map not initialized
 
-            nodes.forEach(node => {
-                const location = NODE_LOCATIONS[node.node_id];
-                if (location) {
-                    const isActive = node.seconds_since_update < INACTIVE_THRESHOLD;
-                    const markerColor = getMarkerColor(node);
+            try {
+                // Clear existing markers
+                map.eachLayer((layer) => {
+                    if (layer instanceof L.Marker) {
+                        map.removeLayer(layer);
+                    }
+                });
 
-                    const customIcon = L.divIcon({
-                        className: 'custom-marker',
-                        html: `<div class="marker-pin ${markerColor}"><span class="marker-icon">📡</span></div>`,
-                        iconSize: [30, 40],
-                        iconAnchor: [15, 40]
-                    });
+                nodes.forEach(node => {
+                    const location = NODE_LOCATIONS[node.node_id];
+                    if (location) {
+                        const isActive = node.seconds_since_update < INACTIVE_THRESHOLD;
+                        const markerColor = getMarkerColor(node);
 
-                    const marker = L.marker([location.lat, location.lng], { icon: customIcon })
-                        .addTo(map)
-                        .bindPopup(`
-                            <strong>${node.node_id}</strong><br>
-                            ${location.name}<br>
-                            Temp: ${node.temperature.toFixed(1)}°C<br>
-                            Pressure: ${node.pressure.toFixed(1)} hPa<br>
-                            Humidity: ${node.humidity.toFixed(1)}%<br>
-                            Battery: ${node.battery_percent}%<br>
-                            Status: ${isActive ? 'Active' : 'Inactive'}
-                        `);
-                }
-            });
+                        const customIcon = L.divIcon({
+                            className: 'custom-marker',
+                            html: `<div class="marker-pin ${markerColor}"><span class="marker-icon">📡</span></div>`,
+                            iconSize: [30, 40],
+                            iconAnchor: [15, 40]
+                        });
+
+                        const marker = L.marker([location.lat, location.lng], { icon: customIcon })
+                            .addTo(map)
+                            .bindPopup(`
+                                <strong>${node.node_id}</strong><br>
+                                ${location.name}<br>
+                                Temp: ${node.temperature.toFixed(1)}°C<br>
+                                Pressure: ${node.pressure.toFixed(1)} hPa<br>
+                                Humidity: ${node.humidity.toFixed(1)}%<br>
+                                Battery: ${node.battery_percent}%<br>
+                                Status: ${isActive ? 'Active' : 'Inactive'}
+                            `);
+                    }
+                });
+            } catch (error) {
+                console.error('Error updating map markers:', error);
+            }
         }
 
         // Get marker color based on node status
@@ -682,33 +693,43 @@
 
         // Toggle heat map
         function toggleHeatMap() {
+            if (!map) {
+                alert('Map is not available. Please reload the page.');
+                return;
+            }
+
             const btn = document.getElementById('heatMapToggle');
 
-            if (heatLayer) {
-                map.removeLayer(heatLayer);
-                heatLayer = null;
-                btn.classList.remove('active');
-            } else {
-                const heatData = currentNodes
-                    .filter(n => NODE_LOCATIONS[n.node_id])
-                    .map(n => {
-                        const loc = NODE_LOCATIONS[n.node_id];
-                        return [loc.lat, loc.lng, n.temperature / 40]; // Normalize temp for intensity
-                    });
+            try {
+                if (heatLayer) {
+                    map.removeLayer(heatLayer);
+                    heatLayer = null;
+                    btn.classList.remove('active');
+                } else {
+                    const heatData = currentNodes
+                        .filter(n => NODE_LOCATIONS[n.node_id])
+                        .map(n => {
+                            const loc = NODE_LOCATIONS[n.node_id];
+                            return [loc.lat, loc.lng, n.temperature / 40]; // Normalize temp for intensity
+                        });
 
-                heatLayer = L.heatLayer(heatData, {
-                    radius: 50,
-                    blur: 40,
-                    maxZoom: 17,
-                    gradient: {
-                        0.0: 'blue',
-                        0.5: 'lime',
-                        0.7: 'yellow',
-                        1.0: 'red'
-                    }
-                }).addTo(map);
+                    heatLayer = L.heatLayer(heatData, {
+                        radius: 50,
+                        blur: 40,
+                        maxZoom: 17,
+                        gradient: {
+                            0.0: 'blue',
+                            0.5: 'lime',
+                            0.7: 'yellow',
+                            1.0: 'red'
+                        }
+                    }).addTo(map);
 
-                btn.classList.add('active');
+                    btn.classList.add('active');
+                }
+            } catch (error) {
+                console.error('Error toggling heat map:', error);
+                alert('Heat map feature unavailable.');
             }
         }
 
@@ -1036,10 +1057,31 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            initMap();
-            updateDashboard();
-            setInterval(updateDashboard, REFRESH_INTERVAL);
-            setInterval(updateDateTime, 1000);
+            console.log('Dashboard initializing...');
+
+            // Initialize map (non-blocking)
+            try {
+                initMap();
+            } catch (error) {
+                console.error('Map initialization failed:', error);
+            }
+
+            // Initialize dashboard data (critical)
+            try {
+                updateDashboard();
+                setInterval(updateDashboard, REFRESH_INTERVAL);
+            } catch (error) {
+                console.error('Dashboard initialization failed:', error);
+            }
+
+            // Initialize datetime updates
+            try {
+                setInterval(updateDateTime, 1000);
+            } catch (error) {
+                console.error('DateTime initialization failed:', error);
+            }
+
+            console.log('Dashboard initialization complete');
         });
     </script>
 </body>

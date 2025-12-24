@@ -594,9 +594,9 @@
     </div>
 
     <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- Leaflet Heat -->
-    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js" crossorigin=""></script>
 
     <script>
         // Configuration
@@ -935,10 +935,25 @@
                 statusClass = 'status-critical';
                 statusBadge = 'critical';
                 statusText = 'INACTIVE';
-            } else if (node.temperature < THRESHOLDS.temp_low || node.battery_percent < THRESHOLDS.battery_low) {
-                statusClass = 'status-warning';
-                statusBadge = 'warning';
-                statusText = 'WARNING';
+            } else {
+                // Check for warning conditions
+                let hasWarning = false;
+
+                // Temperature warning
+                if (node.temperature < THRESHOLDS.temp_low) {
+                    hasWarning = true;
+                }
+
+                // Battery warning (only for battery-powered nodes)
+                if (node.node_id !== 'NODE_INDOORS' && node.battery_percent < THRESHOLDS.battery_low) {
+                    hasWarning = true;
+                }
+
+                if (hasWarning) {
+                    statusClass = 'status-warning';
+                    statusBadge = 'warning';
+                    statusText = 'WARNING';
+                }
             }
 
             // Handle NODE_WIFI battery display
@@ -957,7 +972,7 @@
                 <div class="node-card ${statusClass}">
                     <div class="node-header">
                         <div class="node-name">${node.node_id}</div>
-                        <div class="status-badge ${statusBadge}">${statusText} - ${node.node_id.includes('red') ? 'red' : 'green'}</div>
+                        <div class="status-badge ${statusBadge}">${statusText}</div>
                     </div>
                     <div class="node-status-icons">
                         <div class="status-icon icon-temp">🌡️</div>
@@ -973,11 +988,11 @@
                         </div>
                         <div class="data-cell">
                             <div class="data-label">Pressure</div>
-                            <div class="data-value">${node.pressure < 100 ? node.pressure : (node.pressure < 200 ? node.pressure : (node.pressure / 10).toFixed(1))}</div>
+                            <div class="data-value">${node.pressure.toFixed(1)}</div>
                         </div>
                         <div class="data-cell">
                             <div class="data-label">Humidity</div>
-                            <div class="data-value">${node.humidity}</div>
+                            <div class="data-value">${node.humidity.toFixed(1)}</div>
                         </div>
                         <div class="data-cell">
                             <div class="data-label">Battery</div>
@@ -1093,15 +1108,31 @@
                 console.error('DateTime initialization failed:', error);
             }
 
-            // Initialize map after a short delay (non-blocking)
-            setTimeout(() => {
+            // Initialize map after a delay to ensure Leaflet is loaded
+            let mapAttempts = 0;
+            const maxMapAttempts = 5;
+
+            function tryInitMap() {
+                mapAttempts++;
                 try {
-                    console.log('Initializing map...');
+                    console.log(`Initializing map... (attempt ${mapAttempts}/${maxMapAttempts})`);
                     initMap();
+
+                    // If map still not initialized and we have attempts left, try again
+                    if (!map && mapAttempts < maxMapAttempts) {
+                        setTimeout(tryInitMap, 1000);
+                    }
                 } catch (error) {
                     console.error('Map initialization failed:', error);
+                    if (mapAttempts < maxMapAttempts) {
+                        setTimeout(tryInitMap, 1000);
+                    } else {
+                        document.getElementById('map').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #7f8c8d; padding: 20px; text-align: center;"><div>📍 Map unavailable<br><small>Sensor data below</small></div></div>';
+                    }
                 }
-            }, 500);
+            }
+
+            setTimeout(tryInitMap, 1000);
 
             console.log('Dashboard initialization complete');
         });

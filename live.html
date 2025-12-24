@@ -558,11 +558,15 @@
 
         <!-- Charts -->
         <div class="chart-container">
-            <div class="chart-title">📊 Sensor Data History (24 Hours)</div>
+            <div class="chart-title">📊 Temperature & Dewpoint History (24 Hours)</div>
             <div class="time-selector">
                 <button class="time-btn" onclick="updateCharts('1h')">1 Hour</button>
                 <button class="time-btn" onclick="updateCharts('6h')">6 Hours</button>
                 <button class="time-btn active" onclick="updateCharts('24h')">24 Hours</button>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #666; font-size: 14px; margin-bottom: 8px; font-weight: 500;">📍 Show Nodes:</label>
+                <div id="node-checkboxes" style="display: flex; gap: 15px; flex-wrap: wrap;"></div>
             </div>
             <canvas id="tempChart"></canvas>
         </div>
@@ -1078,51 +1082,135 @@
             });
         }
 
-        // Charts
+        // Populate node checkboxes
+        function populateNodeCheckboxes() {
+            const container = document.getElementById('node-checkboxes');
+            container.innerHTML = '';
+
+            const nodeColors = {
+                'NODE_01': '#f59e0b',
+                'NODE_02': '#3b82f6',
+                'NODE_INDOORS': '#06b6d4',
+                'NODE_WIFI': '#10b981'
+            };
+
+            // Default checked nodes
+            const defaultChecked = ['NODE_01', 'NODE_02'];
+
+            currentNodes.forEach(node => {
+                const checkbox = document.createElement('label');
+                checkbox.style.cssText = 'display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px; color: #333;';
+
+                const color = nodeColors[node.node_id] || '#999';
+                const isChecked = defaultChecked.includes(node.node_id);
+
+                checkbox.innerHTML = `
+                    <input type="checkbox"
+                           class="node-checkbox"
+                           value="${node.node_id}"
+                           ${isChecked ? 'checked' : ''}
+                           onchange="updateCharts('${currentTimeRange}')"
+                           style="cursor: pointer;">
+                    <span style="display: inline-block; width: 12px; height: 12px; background: ${color}; border-radius: 2px;"></span>
+                    <span>${node.node_id}</span>
+                `;
+
+                container.appendChild(checkbox);
+            });
+        }
+
+        // Charts with Dewpoint
         async function updateCharts(timeRange) {
             currentTimeRange = timeRange;
 
-            document.querySelectorAll('.time-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
+            // Update active button if this was triggered by time selector
+            if (event && event.target && event.target.classList.contains('time-btn')) {
+                document.querySelectorAll('.time-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                event.target.classList.add('active');
+            }
 
             try {
                 const hours = timeRange === '1h' ? 1 : timeRange === '6h' ? 6 : 24;
                 const response = await fetch(`${HISTORY_API_URL}?hours=${hours}`);
                 const data = await response.json();
 
+                // Get selected nodes from checkboxes
+                const selectedNodes = Array.from(document.querySelectorAll('.node-checkbox:checked'))
+                    .map(cb => cb.value);
+
+                if (selectedNodes.length === 0) {
+                    console.log('No nodes selected for chart');
+                    return;
+                }
+
                 const ctx = document.getElementById('tempChart').getContext('2d');
 
                 if (tempChart) tempChart.destroy();
 
+                // Organize data by node with dewpoint calculation
                 const nodeData = {};
                 data.readings.forEach(reading => {
+                    if (!selectedNodes.includes(reading.node_id)) return;
+
                     if (!nodeData[reading.node_id]) {
-                        nodeData[reading.node_id] = { timestamps: [], temperatures: [] };
+                        nodeData[reading.node_id] = {
+                            timestamps: [],
+                            temperatures: [],
+                            dewpoints: []
+                        };
                     }
+
+                    const dewpoint = reading.temperature - ((100 - reading.humidity) / 5);
+
                     nodeData[reading.node_id].timestamps.push(new Date(reading.timestamp));
                     nodeData[reading.node_id].temperatures.push(reading.temperature);
+                    nodeData[reading.node_id].dewpoints.push(dewpoint);
                 });
 
                 const datasets = [];
-                const colors = ['#f59e0b', '#3b82f6', '#06b6d4', '#10b981'];
-                let colorIndex = 0;
+                const nodeColors = {
+                    'NODE_01': '#f59e0b',
+                    'NODE_02': '#3b82f6',
+                    'NODE_INDOORS': '#06b6d4',
+                    'NODE_WIFI': '#10b981'
+                };
 
+                // Create datasets for each selected node (temperature + dewpoint)
                 Object.keys(nodeData).forEach(nodeId => {
+                    const color = nodeColors[nodeId] || '#999';
+
+                    // Temperature line (solid)
                     datasets.push({
-                        label: nodeId,
+                        label: `${nodeId} Temp`,
                         data: nodeData[nodeId].timestamps.map((t, i) => ({
                             x: t,
                             y: nodeData[nodeId].temperatures[i]
                         })),
-                        borderColor: colors[colorIndex % colors.length],
-                        backgroundColor: colors[colorIndex % colors.length] + '33',
+                        borderColor: color,
+                        backgroundColor: color + '33',
                         tension: 0.4,
                         fill: false,
-                        borderWidth: 2
+                        borderWidth: 2,
+                        pointRadius: 1
                     });
-                    colorIndex++;
+
+                    // Dewpoint line (dashed)
+                    datasets.push({
+                        label: `${nodeId} Dewpoint`,
+                        data: nodeData[nodeId].timestamps.map((t, i) => ({
+                            x: t,
+                            y: nodeData[nodeId].dewpoints[i]
+                        })),
+                        borderColor: color,
+                        backgroundColor: 'transparent',
+                        tension: 0.4,
+                        fill: false,
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 1
+                    });
                 });
 
                 tempChart = new Chart(ctx, {
@@ -1130,6 +1218,7 @@
                     data: { datasets: datasets },
                     options: {
                         responsive: true,
+                        maintainAspectRatio: true,
                         scales: {
                             x: {
                                 type: 'time',
@@ -1140,7 +1229,17 @@
                             }
                         },
                         plugins: {
-                            legend: { display: true }
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '°C';
+                                    }
+                                }
+                            }
                         }
                     }
                 });
@@ -1256,16 +1355,20 @@
                     console.log('Map initialized');
 
                     console.log('Starting initial dashboard update...');
-                    updateDashboard();
+                    updateDashboard().then(() => {
+                        // Populate checkboxes after first data load
+                        console.log('Populating node checkboxes...');
+                        populateNodeCheckboxes();
+
+                        // Load charts with default selection
+                        setTimeout(() => {
+                            console.log('Loading charts...');
+                            updateCharts('24h');
+                        }, 500);
+                    });
 
                     console.log('Setting up refresh interval...');
                     setInterval(updateDashboard, REFRESH_INTERVAL);
-
-                    // Load charts after initial data
-                    setTimeout(() => {
-                        console.log('Loading charts...');
-                        updateCharts('24h');
-                    }, 1000);
                 } catch (e) {
                     console.error('Initialization failed:', e);
                 }

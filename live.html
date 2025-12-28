@@ -17,6 +17,7 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
 
     <style>
         * {
@@ -660,10 +661,14 @@
                 <button class="time-btn" onclick="updateCharts('1h')">1 Hour</button>
                 <button class="time-btn" onclick="updateCharts('6h')">6 Hours</button>
                 <button class="time-btn active" onclick="updateCharts('24h')">24 Hours</button>
+                <button class="time-btn" onclick="resetChartZoom()" style="margin-left: 10px; background: #f59e0b; border-color: #f59e0b; color: white;">🔍 Reset Zoom</button>
             </div>
             <div style="margin-bottom: 15px;">
                 <label style="display: block; color: #666; font-size: 14px; margin-bottom: 8px; font-weight: 500;">📍 Show Nodes:</label>
                 <div id="node-checkboxes" style="display: flex; gap: 15px; flex-wrap: wrap;"></div>
+            </div>
+            <div style="margin-bottom: 10px; padding: 8px; background: #f0f9ff; border-left: 3px solid #3b82f6; border-radius: 4px; font-size: 13px; color: #1e40af;">
+                💡 <strong>Tip:</strong> Scroll wheel to zoom, Ctrl+drag to pan, double-click or use Reset Zoom button to reset view
             </div>
             <canvas id="tempChart"></canvas>
         </div>
@@ -1216,6 +1221,13 @@
             });
         }
 
+        // Reset chart zoom
+        function resetChartZoom() {
+            if (tempChart) {
+                tempChart.resetZoom();
+            }
+        }
+
         // Charts with Dewpoint
         async function updateCharts(timeRange) {
             currentTimeRange = timeRange;
@@ -1316,6 +1328,11 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: true,
+                        interaction: {
+                            mode: 'nearest',
+                            axis: 'x',
+                            intersect: false
+                        },
                         scales: {
                             x: {
                                 type: 'time',
@@ -1335,6 +1352,26 @@
                                     label: function(context) {
                                         return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '°C';
                                     }
+                                }
+                            },
+                            zoom: {
+                                pan: {
+                                    enabled: true,
+                                    mode: 'x',
+                                    modifierKey: 'ctrl'
+                                },
+                                zoom: {
+                                    wheel: {
+                                        enabled: true,
+                                        speed: 0.1
+                                    },
+                                    pinch: {
+                                        enabled: true
+                                    },
+                                    mode: 'x'
+                                },
+                                limits: {
+                                    x: { min: 'original', max: 'original' }
                                 }
                             }
                         }

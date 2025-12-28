@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | LoRaLeaf</title>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .admin-header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .admin-toggle {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #ddd;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #10b981;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: left 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            left: 33px;
+        }
+
+        .toggle-label {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .toggle-label.active {
+            color: #10b981;
+        }
+
+        .admin-info {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #92400e;
+            display: none;
+        }
+
+        .admin-info.visible {
+            display: block;
+        }
+
+        .admin-info h3 {
+            margin-bottom: 10px;
+        }
+
+        .admin-info ul {
+            margin-left: 20px;
+        }
+
+        .admin-info li {
+            margin: 5px 0;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn:hover, .btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-danger {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-success {
+            border-color: #10b981;
+            color: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-warning {
+            border-color: #f59e0b;
+            color: #f59e0b;
+        }
+
+        .btn-warning:hover {
+            background: #f59e0b;
+            color: white;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.visible {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .modal-body {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .data-info {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .data-info strong {
+            color: #333;
+        }
+
+        /* Annotation Form */
+        .annotation-form {
+            margin-top: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-select {
+            cursor: pointer;
+        }
+
+        /* Annotation legend */
+        .annotation-legend {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .legend-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .legend-items {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Admin Dashboard</h1>
+
+        <!-- Admin Header -->
+        <div class="admin-header">
+            <div class="admin-title">📊 Data Management</div>
+            <div class="admin-toggle">
+                <span class="toggle-label" id="toggleLabel">Admin Mode: OFF</span>
+                <div class="toggle-switch" id="adminToggle" onclick="toggleAdminMode()"></div>
+            </div>
+        </div>
+
+        <!-- Admin Info -->
+        <div class="admin-info" id="adminInfo">
+            <h3>🛠️ Admin Mode Enabled</h3>
+            <ul>
+                <li><strong>Delete Points:</strong> Click on any data point to delete it</li>
+                <li><strong>Add Annotations:</strong> Click "Add Annotation" button, then click on chart</li>
+                <li><strong>Zoom:</strong> Scroll wheel to zoom, Ctrl+drag to pan, double-click to reset</li>
+                <li><strong>View Data:</strong> Hover over points to see values</li>
+            </ul>
+        </div>
+
+        <!-- Chart Container -->
+        <div class="chart-container">
+            <div class="chart-title">📈 Temperature & Dewpoint Data (Last 24 Hours)</div>
+
+            <div class="controls">
+                <button class="btn" onclick="updateCharts('1h')">1 Hour</button>
+                <button class="btn" onclick="updateCharts('6h')">6 Hours</button>
+                <button class="btn active" onclick="updateCharts('24h')">24 Hours</button>
+                <button class="btn btn-warning" onclick="resetChartZoom()">🔍 Reset Zoom</button>
+                <button class="btn btn-success" id="addAnnotationBtn" onclick="startAnnotation()" disabled>📌 Add Annotation</button>
+                <button class="btn btn-danger" id="clearAnnotationsBtn" onclick="clearAnnotations()" disabled>🗑️ Clear Annotations</button>
+            </div>
+
+            <div class="annotation-legend" id="annotationLegend" style="display: none;">
+                <div class="legend-title">📍 Active Annotations:</div>
+                <div class="legend-items" id="legendItems"></div>
+            </div>
+
+            <canvas id="tempChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-title">⚠️ Delete Data Point?</div>
+            <div class="modal-body">
+                <p>Are you sure you want to permanently delete this data point?</p>
+                <div class="data-info" id="deleteInfo"></div>
+                <p><strong>This action cannot be undone!</strong></p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Annotation Modal -->
+    <div class="modal" id="annotationModal">
+        <div class="modal-content">
+            <div class="modal-title">📌 Add Annotation</div>
+            <div class="modal-body">
+                <p>Add a note or tag to mark this point on the chart:</p>
+                <div class="data-info" id="annotationInfo"></div>
+
+                <form class="annotation-form">
+                    <div class="form-group">
+                        <label class="form-label">Type:</label>
+                        <select class="form-select" id="annotationType">
+                            <option value="info">ℹ️ Info - General note</option>
+                            <option value="warning">⚠️ Warning - Potential issue</option>
+                            <option value="error">❌ Error - Data anomaly</option>
+                            <option value="maintenance">🔧 Maintenance - System work</option>
+                            <option value="weather">🌦️ Weather - Weather event</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Note:</label>
+                        <textarea class="form-textarea" id="annotationText" placeholder="Describe what happened at this point..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeAnnotationModal()">Cancel</button>
+                <button class="btn btn-success" onclick="saveAnnotation()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_URL = '/api/nodes';
+        const HISTORY_API_URL = '/api/history';
+
+        // State
+        let adminMode = false;
+        let tempChart = null;
+        let currentTimeRange = '24h';
+        let pendingDelete = null;
+        let pendingAnnotation = null;
+        let annotationMode = false;
+        let annotations = [];
+
+        // Annotation colors
+        const ANNOTATION_COLORS = {
+            'info': '#3b82f6',
+            'warning': '#f59e0b',
+            'error': '#ef4444',
+            'maintenance': '#8b5cf6',
+            'weather': '#06b6d4'
+        };
+
+        // Toggle admin mode
+        function toggleAdminMode() {
+            adminMode = !adminMode;
+            const toggle = document.getElementById('adminToggle');
+            const label = document.getElementById('toggleLabel');
+            const info = document.getElementById('adminInfo');
+            const addBtn = document.getElementById('addAnnotationBtn');
+            const clearBtn = document.getElementById('clearAnnotationsBtn');
+
+            if (adminMode) {
+                toggle.classList.add('active');
+                label.classList.add('active');
+                label.textContent = 'Admin Mode: ON';
+                info.classList.add('visible');
+                addBtn.disabled = false;
+                clearBtn.disabled = false;
+            } else {
+                toggle.classList.remove('active');
+                label.classList.remove('active');
+                label.textContent = 'Admin Mode: OFF';
+                info.classList.remove('visible');
+                addBtn.disabled = true;
+                clearBtn.disabled = true;
+                annotationMode = false;
+            }
+        }
+
+        // Chart click handler
+        function handleChartClick(event) {
+            if (!adminMode) return;
+
+            const points = tempChart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, true);
+
+            if (points.length > 0) {
+                const point = points[0];
+                const dataset = tempChart.data.datasets[point.datasetIndex];
+                const dataPoint = dataset.data[point.index];
+
+                if (annotationMode) {
+                    // Show annotation modal
+                    showAnnotationModal(dataPoint, dataset.label);
+                } else {
+                    // Show delete modal
+                    showDeleteModal(dataPoint, dataset.label);
+                }
+            }
+        }
+
+        // Delete modal functions
+        function showDeleteModal(dataPoint, datasetLabel) {
+            pendingDelete = { dataPoint, datasetLabel };
+
+            const info = document.getElementById('deleteInfo');
+            info.innerHTML = `
+                <strong>Dataset:</strong> ${datasetLabel}<br>
+                <strong>Time:</strong> ${new Date(dataPoint.x).toLocaleString()}<br>
+                <strong>Value:</strong> ${dataPoint.y.toFixed(2)}°C
+            `;
+
+            document.getElementById('deleteModal').classList.add('visible');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('visible');
+            pendingDelete = null;
+        }
+
+        async function confirmDelete() {
+            if (!pendingDelete) return;
+
+            try {
+                const response = await fetch('/api/delete_point', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        timestamp: new Date(pendingDelete.dataPoint.x).toISOString(),
+                        node_id: pendingDelete.datasetLabel.split(' ')[0]
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    console.log('✅ Deleted:', result);
+                    alert(`Successfully deleted data point from ${result.node_id}`);
+
+                    // Reload chart to show updated data
+                    await updateCharts(currentTimeRange);
+                } else {
+                    console.error('Delete failed:', result);
+                    alert('Error deleting point: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                alert('Network error deleting point: ' + error.message);
+            }
+
+            closeDeleteModal();
+        }
+
+        // Annotation functions
+        function startAnnotation() {
+            annotationMode = !annotationMode;
+            const btn = document.getElementById('addAnnotationBtn');
+
+            if (annotationMode) {
+                btn.textContent = '❌ Cancel Annotation';
+                btn.classList.add('btn-danger');
+                btn.classList.remove('btn-success');
+            } else {
+                btn.textContent = '📌 Add Annotation';
+                btn.classList.remove('btn-danger');
+                btn.classList.add('btn-success');
+            }
+        }
+
+        function showAnnotationModal(dataPoint, datasetLabel) {
+            pendingAnnotation = { dataPoint, datasetLabel };
+
+            const info = document.getElementById('annotationInfo');
+            info.innerHTML = `
+                <strong>Dataset:</strong> ${datasetLabel}<br>
+                <strong>Time:</strong> ${new Date(dataPoint.x).toLocaleString()}<br>
+                <strong>Value:</strong> ${dataPoint.y.toFixed(2)}°C
+            `;
+
+            document.getElementById('annotationModal').classList.add('visible');
+        }
+
+        function closeAnnotationModal() {
+            document.getElementById('annotationModal').classList.remove('visible');
+            pendingAnnotation = null;
+            annotationMode = false;
+            startAnnotation(); // Reset button
+        }
+
+        async function saveAnnotation() {
+            if (!pendingAnnotation) return;
+
+            const type = document.getElementById('annotationType').value;
+            const text = document.getElementById('annotationText').value;
+
+            if (!text.trim()) {
+                alert('Please enter a note for the annotation');
+                return;
+            }
+
+            const annotation = {
+                type: type,
+                text: text,
+                timestamp: new Date(pendingAnnotation.dataPoint.x).toISOString(),
+                node_id: pendingAnnotation.datasetLabel.split(' ')[0],
+                value: pendingAnnotation.dataPoint.y
+            };
+
+            try {
+                const response = await fetch('/api/annotations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(annotation)
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    console.log('✅ Saved annotation:', result);
+
+                    // Add to local array with server ID
+                    annotation.id = result.id;
+                    annotations.push(annotation);
+                    updateChartAnnotations();
+                    updateAnnotationLegend();
+
+                    alert('Annotation saved successfully!');
+                } else {
+                    console.error('Save failed:', result);
+                    alert('Error saving annotation: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                alert('Network error saving annotation: ' + error.message);
+            }
+
+            closeAnnotationModal();
+            document.getElementById('annotationText').value = '';
+        }
+
+        function updateChartAnnotations() {
+            if (!tempChart) return;
+
+            const annotationObjects = {};
+
+            annotations.forEach(ann => {
+                const icon = ann.type === 'info' ? 'ℹ️' :
+                             ann.type === 'warning' ? '⚠️' :
+                             ann.type === 'error' ? '❌' :
+                             ann.type === 'maintenance' ? '🔧' : '🌦️';
+
+                annotationObjects[ann.id] = {
+                    type: 'line',
+                    xMin: ann.timestamp,
+                    xMax: ann.timestamp,
+                    borderColor: ANNOTATION_COLORS[ann.type],
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    label: {
+                        display: true,
+                        content: icon,
+                        position: 'start',
+                        backgroundColor: ANNOTATION_COLORS[ann.type]
+                    }
+                };
+            });
+
+            tempChart.options.plugins.annotation = {
+                annotations: annotationObjects
+            };
+
+            tempChart.update();
+        }
+
+        function updateAnnotationLegend() {
+            const legend = document.getElementById('annotationLegend');
+            const items = document.getElementById('legendItems');
+
+            if (annotations.length === 0) {
+                legend.style.display = 'none';
+                return;
+            }
+
+            legend.style.display = 'block';
+            items.innerHTML = '';
+
+            annotations.forEach(ann => {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                item.innerHTML = `
+                    <div class="legend-color" style="background: ${ANNOTATION_COLORS[ann.type]};"></div>
+                    <span>${new Date(ann.timestamp).toLocaleString()}: ${ann.text.substring(0, 30)}${ann.text.length > 30 ? '...' : ''}</span>
+                `;
+                items.appendChild(item);
+            });
+        }
+
+        async function clearAnnotations() {
+            if (annotations.length === 0) {
+                alert('No annotations to clear');
+                return;
+            }
+
+            if (!confirm(`Delete all ${annotations.length} annotations from database?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/annotations/clear', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    console.log(`✅ Cleared ${result.deleted_count} annotations`);
+                    annotations = [];
+                    updateChartAnnotations();
+                    updateAnnotationLegend();
+                    alert(`Successfully deleted ${result.deleted_count} annotations`);
+                } else {
+                    console.error('Clear failed:', result);
+                    alert('Error clearing annotations: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Clear error:', error);
+                alert('Network error clearing annotations: ' + error.message);
+            }
+        }
+
+        // Load annotations from server
+        async function loadAnnotations() {
+            try {
+                const response = await fetch('/api/annotations');
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    annotations = result.annotations;
+                    console.log(`✅ Loaded ${annotations.length} annotations`);
+                    updateChartAnnotations();
+                    updateAnnotationLegend();
+                } else {
+                    console.error('Load failed:', result);
+                }
+            } catch (error) {
+                console.error('Load annotations error:', error);
+            }
+        }
+
+        // Chart functions
+        function resetChartZoom() {
+            if (tempChart) {
+                tempChart.resetZoom();
+            }
+        }
+
+        async function updateCharts(timeRange) {
+            currentTimeRange = timeRange;
+
+            // Update active button
+            document.querySelectorAll('.controls .btn:not(.btn-warning):not(.btn-success):not(.btn-danger)').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            try {
+                const hours = timeRange === '1h' ? 1 : timeRange === '6h' ? 6 : 24;
+                const response = await fetch(`${HISTORY_API_URL}?hours=${hours}`);
+                const data = await response.json();
+
+                const ctx = document.getElementById('tempChart').getContext('2d');
+
+                if (tempChart) tempChart.destroy();
+
+                // Organize data by node
+                const nodeData = {};
+                data.readings.forEach(reading => {
+                    if (!nodeData[reading.node_id]) {
+                        nodeData[reading.node_id] = {
+                            timestamps: [],
+                            temperatures: [],
+                            dewpoints: []
+                        };
+                    }
+
+                    const dewpoint = reading.temperature - ((100 - reading.humidity) / 5);
+
+                    nodeData[reading.node_id].timestamps.push(new Date(reading.timestamp));
+                    nodeData[reading.node_id].temperatures.push(reading.temperature);
+                    nodeData[reading.node_id].dewpoints.push(dewpoint);
+                });
+
+                const datasets = [];
+                const nodeColors = {
+                    'NODE_01': '#f59e0b',
+                    'NODE_02': '#3b82f6',
+                    'NODE_INDOORS': '#06b6d4',
+                    'NODE_WIFI': '#10b981'
+                };
+
+                // Create datasets
+                Object.keys(nodeData).forEach(nodeId => {
+                    const color = nodeColors[nodeId] || '#999';
+
+                    // Temperature line (solid)
+                    datasets.push({
+                        label: `${nodeId} Temp`,
+                        data: nodeData[nodeId].timestamps.map((t, i) => ({
+                            x: t,
+                            y: nodeData[nodeId].temperatures[i]
+                        })),
+                        borderColor: color,
+                        backgroundColor: color + '33',
+                        tension: 0.4,
+                        fill: false,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 6
+                    });
+
+                    // Dewpoint line (dashed)
+                    datasets.push({
+                        label: `${nodeId} Dewpoint`,
+                        data: nodeData[nodeId].timestamps.map((t, i) => ({
+                            x: t,
+                            y: nodeData[nodeId].dewpoints[i]
+                        })),
+                        borderColor: color,
+                        backgroundColor: 'transparent',
+                        tension: 0.4,
+                        fill: false,
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 3,
+                        pointHoverRadius: 6
+                    });
+                });
+
+                tempChart = new Chart(ctx, {
+                    type: 'line',
+                    data: { datasets: datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        interaction: {
+                            mode: 'nearest',
+                            axis: 'x',
+                            intersect: true
+                        },
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: { unit: hours === 1 ? 'minute' : 'hour' }
+                            },
+                            y: {
+                                title: { display: true, text: 'Temperature (°C)' }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '°C';
+                                    }
+                                }
+                            },
+                            zoom: {
+                                pan: {
+                                    enabled: true,
+                                    mode: 'x',
+                                    modifierKey: 'ctrl'
+                                },
+                                zoom: {
+                                    wheel: {
+                                        enabled: true,
+                                        speed: 0.1
+                                    },
+                                    pinch: {
+                                        enabled: true
+                                    },
+                                    mode: 'x'
+                                },
+                                limits: {
+                                    x: { min: 'original', max: 'original' }
+                                }
+                            }
+                        },
+                        onClick: handleChartClick
+                    }
+                });
+
+                // Re-apply annotations if any
+                updateChartAnnotations();
+
+            } catch (error) {
+                console.error('Error updating charts:', error);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            await updateCharts('24h');
+            await loadAnnotations();
+        });
+    </script>
+</body>
+</html>

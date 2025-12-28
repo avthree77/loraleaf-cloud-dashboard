@@ -415,7 +415,7 @@
     <script>
         // Configuration
         const API_URL = '/api/nodes';
-        const HISTORY_API_URL = '/api/history';
+        const CHART_DATA_URL = '/api/chart_data';
 
         // State
         let adminMode = false;
@@ -743,36 +743,42 @@
             currentTimeRange = timeRange;
 
             // Update active button
-            document.querySelectorAll('.controls .btn:not(.btn-warning):not(.btn-success):not(.btn-danger)').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
+            if (event && event.target) {
+                document.querySelectorAll('.controls .btn:not(.btn-warning):not(.btn-success):not(.btn-danger)').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                event.target.classList.add('active');
+            }
 
             try {
-                const hours = timeRange === '1h' ? 1 : timeRange === '6h' ? 6 : 24;
-                const response = await fetch(`${HISTORY_API_URL}?hours=${hours}`);
+                const rangeParam = timeRange === '1h' ? '1h' : timeRange === '6h' ? '6h' : '24h';
+                const response = await fetch(`${CHART_DATA_URL}?range=${rangeParam}`);
                 const data = await response.json();
 
                 const ctx = document.getElementById('tempChart').getContext('2d');
 
                 if (tempChart) tempChart.destroy();
 
-                // Organize data by node
+                // Data is already organized by node_id
                 const nodeData = {};
-                data.readings.forEach(reading => {
-                    if (!nodeData[reading.node_id]) {
-                        nodeData[reading.node_id] = {
-                            timestamps: [],
-                            temperatures: [],
-                            dewpoints: []
-                        };
-                    }
+                Object.keys(data).forEach(nodeId => {
+                    if (nodeId === 'error') return; // Skip error key if present
 
-                    const dewpoint = reading.temperature - ((100 - reading.humidity) / 5);
+                    nodeData[nodeId] = {
+                        timestamps: [],
+                        temperatures: [],
+                        dewpoints: []
+                    };
 
-                    nodeData[reading.node_id].timestamps.push(new Date(reading.timestamp));
-                    nodeData[reading.node_id].temperatures.push(reading.temperature);
-                    nodeData[reading.node_id].dewpoints.push(dewpoint);
+                    data[nodeId].forEach(reading => {
+                        nodeData[nodeId].timestamps.push(new Date(reading.timestamp));
+                        nodeData[nodeId].temperatures.push(reading.temperature);
+
+                        // Use dewpoint from API if available, otherwise calculate
+                        const dewpoint = reading.dewpoint !== null ? reading.dewpoint :
+                                       reading.temperature - ((100 - reading.humidity) / 5);
+                        nodeData[nodeId].dewpoints.push(dewpoint);
+                    });
                 });
 
                 const datasets = [];
@@ -835,7 +841,7 @@
                         scales: {
                             x: {
                                 type: 'time',
-                                time: { unit: hours === 1 ? 'minute' : 'hour' }
+                                time: { unit: rangeParam === '1h' ? 'minute' : 'hour' }
                             },
                             y: {
                                 title: { display: true, text: 'Temperature (°C)' }

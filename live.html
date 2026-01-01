@@ -705,10 +705,11 @@
         const INACTIVE_THRESHOLD = 300;
 
         const NODE_LOCATIONS = {
-            'NODE_01': { lat: 50.2660, lng: -5.0527, name: 'Outdoor Sensor 1' },
-            'NODE_02': { lat: 50.2665, lng: -5.0520, name: 'Outdoor Sensor 2' },
+            'NODE_01': { lat: 50.2660, lng: -5.0527, name: 'Outdoor LoRa 1' },
+            'NODE_02': { lat: 50.2665, lng: -5.0520, name: 'Outdoor LoRa 2' },
             'NODE_WIFI': { lat: 50.2670, lng: -5.0515, name: 'Solar WiFi Node' },
-            'NODE_INDOORS': { lat: 50.2655, lng: -5.0530, name: 'Indoor Sensor' }
+            'NODE_INDOORS': { lat: 50.2655, lng: -5.0530, name: 'Indoor Base Station' },
+            'NODE_SOIL_01': { lat: 50.2658, lng: -5.0522, name: 'Soil Moisture Sensor' }
         };
 
         let map, heatLayer, tempChart;
@@ -1461,20 +1462,72 @@
             const container = document.getElementById('nodes-container');
             container.innerHTML = '';
 
-            // Only show main nodes
-            const displayNodes = ['NODE_01', 'NODE_02', 'NODE_WIFI'];
+            // Show various node types to demonstrate diversity
+            const displayNodes = ['NODE_01', 'NODE_02', 'NODE_WIFI', 'NODE_INDOORS', 'NODE_SOIL_01'];
+
+            const nodeColors = {
+                'NODE_01': '#f59e0b',
+                'NODE_02': '#3b82f6',
+                'NODE_WIFI': '#10b981',
+                'NODE_INDOORS': '#8b5cf6',
+                'NODE_SOIL_01': '#a3622a'
+            };
 
             nodes.filter(n => displayNodes.includes(n.node_id)).forEach(node => {
                 const isActive = node.seconds_since_update < INACTIVE_THRESHOLD;
-                const nodeColors = {
-                    'NODE_01': '#f59e0b',
-                    'NODE_02': '#3b82f6',
-                    'NODE_WIFI': '#10b981'
-                };
                 const color = nodeColors[node.node_id] || '#999';
+                const isSoilNode = node.node_id === 'NODE_SOIL_01';
 
                 const card = document.createElement('div');
                 card.className = 'node-card';
+
+                // Build readings based on node type
+                let readingsHtml = '';
+
+                if (isSoilNode) {
+                    // Soil node: soil moisture first, then other readings
+                    readingsHtml = `
+                        <div class="reading">
+                            <span class="reading-label">🌱 Soil Moisture</span>
+                            <span class="reading-value" style="color: #a3622a;">${node.soil_moisture ? node.soil_moisture.toFixed(1) : '--'}%</span>
+                        </div>
+                        <div class="reading">
+                            <span class="reading-label">🌡️ Temperature</span>
+                            <span class="reading-value temp">${node.temperature.toFixed(1)}°C</span>
+                        </div>
+                        <div class="reading">
+                            <span class="reading-label">💧 Humidity</span>
+                            <span class="reading-value humidity">${node.humidity.toFixed(1)}%</span>
+                        </div>
+                    `;
+                } else {
+                    // Standard weather nodes
+                    readingsHtml = `
+                        <div class="reading">
+                            <span class="reading-label">🌡️ Temperature</span>
+                            <span class="reading-value temp">${node.temperature.toFixed(1)}°C</span>
+                        </div>
+                        <div class="reading">
+                            <span class="reading-label">🔽 Pressure</span>
+                            <span class="reading-value pressure">${node.pressure.toFixed(1)} hPa</span>
+                        </div>
+                        <div class="reading">
+                            <span class="reading-label">💧 Humidity</span>
+                            <span class="reading-value humidity">${node.humidity.toFixed(1)}%</span>
+                        </div>
+                    `;
+                }
+
+                // Add battery for nodes that have it
+                if (node.battery_voltage) {
+                    readingsHtml += `
+                        <div class="reading">
+                            <span class="reading-label">🔋 Battery</span>
+                            <span class="reading-value">${node.battery_voltage.toFixed(2)}V (${node.battery_percent}%)</span>
+                        </div>
+                    `;
+                }
+
                 card.innerHTML = `
                     <div class="node-header">
                         <div class="node-name">${node.node_id}</div>
@@ -1482,26 +1535,9 @@
                             ${isActive ? 'ACTIVE' : 'INACTIVE'}
                         </div>
                     </div>
-                    <div class="reading">
-                        <span class="reading-label">🌡️ Temperature</span>
-                        <span class="reading-value temp">${node.temperature.toFixed(1)}°C</span>
-                    </div>
-                    <div class="reading">
-                        <span class="reading-label">🔽 Pressure</span>
-                        <span class="reading-value pressure">${node.pressure.toFixed(1)} hPa</span>
-                    </div>
-                    <div class="reading">
-                        <span class="reading-label">💧 Humidity</span>
-                        <span class="reading-value humidity">${node.humidity.toFixed(1)}%</span>
-                    </div>
-                    ${node.battery_voltage ? `
-                    <div class="reading">
-                        <span class="reading-label">🔋 Battery</span>
-                        <span class="reading-value">${node.battery_voltage.toFixed(2)}V (${node.battery_percent}%)</span>
-                    </div>
-                    ` : ''}
+                    ${readingsHtml}
                     <div class="mini-chart-wrapper" style="margin-top: 10px; cursor: pointer;" onclick="cycleMiniChart('${node.node_id}', '${color}')">
-                        <div id="mini-chart-label-${node.node_id}" style="font-size: 11px; color: #666; margin-bottom: 4px;">🌡️ Temp (6hr) - click to change</div>
+                        <div id="mini-chart-label-${node.node_id}" style="font-size: 11px; color: #666; margin-bottom: 4px;">${isSoilNode ? '🌱 Soil (6hr)' : '🌡️ Temp (6hr)'} - click to change</div>
                         <div class="mini-chart-container" style="height: 60px;">
                             <canvas id="mini-chart-${node.node_id}"></canvas>
                         </div>
@@ -1510,16 +1546,21 @@
                 `;
                 container.appendChild(card);
 
-                // Initialize chart type and create mini chart after card is added to DOM
-                if (!miniChartType[node.node_id]) miniChartType[node.node_id] = 'temp';
+                // Initialize chart type: soil nodes start with soil moisture, others with temp
+                if (!miniChartType[node.node_id]) {
+                    miniChartType[node.node_id] = isSoilNode ? 'soil' : 'temp';
+                }
                 setTimeout(() => createMiniChart(node.node_id, color), 100);
             });
         }
 
         // Cycle mini chart data type on click
         function cycleMiniChart(nodeId, color) {
-            const types = ['temp', 'humidity', 'pressure'];
-            const currentIndex = types.indexOf(miniChartType[nodeId] || 'temp');
+            // Soil nodes have different cycle: soil -> temp -> humidity -> pressure
+            const isSoilNode = nodeId === 'NODE_SOIL_01';
+            const types = isSoilNode ? ['soil', 'temp', 'humidity', 'pressure'] : ['temp', 'humidity', 'pressure'];
+            const currentType = miniChartType[nodeId] || (isSoilNode ? 'soil' : 'temp');
+            const currentIndex = types.indexOf(currentType);
             miniChartType[nodeId] = types[(currentIndex + 1) % types.length];
             createMiniChart(nodeId, color);
         }
@@ -1544,18 +1585,21 @@
                     miniCharts[nodeId].destroy();
                 }
 
-                const dataType = miniChartType[nodeId] || 'temp';
+                const isSoilNode = nodeId === 'NODE_SOIL_01';
+                const dataType = miniChartType[nodeId] || (isSoilNode ? 'soil' : 'temp');
                 const readings = miniChartData[nodeId];
 
                 // Get data based on type
                 const chartData = readings.map(r => ({
                     x: new Date(r.timestamp),
-                    y: dataType === 'temp' ? r.temperature :
+                    y: dataType === 'soil' ? (r.soil_moisture || r.battery_percent || 0) :
+                       dataType === 'temp' ? r.temperature :
                        dataType === 'humidity' ? r.humidity : r.pressure
                 }));
 
                 // Update label
                 const labels = {
+                    'soil': '🌱 Soil (6hr)',
                     'temp': '🌡️ Temp (6hr)',
                     'humidity': '💧 Humidity (6hr)',
                     'pressure': '🔽 Pressure (6hr)'

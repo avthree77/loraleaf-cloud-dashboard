@@ -47,6 +47,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 'humidity': entity.get('humidity', 0),
                 'battery_voltage': entity.get('battery_voltage', 0),
                 'battery_percent': entity.get('battery_percent', 0),
+                'soil_moisture': entity.get('soil_moisture', 0),
                 'rssi': entity.get('rssi', 0),
                 'snr': entity.get('snr', 0)
             })

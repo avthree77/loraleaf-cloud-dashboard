@@ -1440,8 +1440,7 @@
 
                 const activeNodes = currentNodes.filter(n =>
                     n.seconds_since_update < INACTIVE_THRESHOLD &&
-                    n.node_id !== 'NODE_WIFI' &&
-                    n.node_id !== 'NODE_INDOORS'
+                    /^NODE_\d+$/.test(n.node_id)
                 );
                 console.log('Active nodes for barometer:', activeNodes.length);
 

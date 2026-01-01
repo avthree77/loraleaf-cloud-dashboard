@@ -1452,8 +1452,10 @@
         }
 
         // Node Cards
-        // Store mini chart instances
+        // Store mini chart instances and state
         const miniCharts = {};
+        const miniChartData = {};  // Store fetched data for each node
+        const miniChartType = {};  // Current data type for each node: 'temp', 'humidity', 'pressure'
 
         function updateNodes(nodes) {
             const container = document.getElementById('nodes-container');
@@ -1498,23 +1500,39 @@
                         <span class="reading-value">${node.battery_voltage.toFixed(2)}V (${node.battery_percent}%)</span>
                     </div>
                     ` : ''}
-                    <div class="mini-chart-container" style="margin-top: 10px; height: 60px;">
-                        <canvas id="mini-chart-${node.node_id}"></canvas>
+                    <div class="mini-chart-wrapper" style="margin-top: 10px; cursor: pointer;" onclick="cycleMiniChart('${node.node_id}', '${color}')">
+                        <div id="mini-chart-label-${node.node_id}" style="font-size: 11px; color: #666; margin-bottom: 4px;">🌡️ Temp (6hr) - click to change</div>
+                        <div class="mini-chart-container" style="height: 60px;">
+                            <canvas id="mini-chart-${node.node_id}"></canvas>
+                        </div>
                     </div>
                     <div class="timestamp">Last updated: ${node.last_update}</div>
                 `;
                 container.appendChild(card);
 
-                // Create mini chart after card is added to DOM
+                // Initialize chart type and create mini chart after card is added to DOM
+                if (!miniChartType[node.node_id]) miniChartType[node.node_id] = 'temp';
                 setTimeout(() => createMiniChart(node.node_id, color), 100);
             });
+        }
+
+        // Cycle mini chart data type on click
+        function cycleMiniChart(nodeId, color) {
+            const types = ['temp', 'humidity', 'pressure'];
+            const currentIndex = types.indexOf(miniChartType[nodeId] || 'temp');
+            miniChartType[nodeId] = types[(currentIndex + 1) % types.length];
+            createMiniChart(nodeId, color);
         }
 
         // Create mini sparkline chart for a node
         async function createMiniChart(nodeId, color) {
             try {
-                const response = await fetch(`${HISTORY_API_URL}?hours=6&node_id=${nodeId}`);
-                const data = await response.json();
+                // Fetch data if not cached
+                if (!miniChartData[nodeId]) {
+                    const response = await fetch(`${HISTORY_API_URL}?hours=6&node_id=${nodeId}`);
+                    const data = await response.json();
+                    miniChartData[nodeId] = data.readings.filter(r => r.node_id === nodeId);
+                }
 
                 const canvas = document.getElementById(`mini-chart-${nodeId}`);
                 if (!canvas) return;
@@ -1526,11 +1544,26 @@
                     miniCharts[nodeId].destroy();
                 }
 
-                const readings = data.readings.filter(r => r.node_id === nodeId);
+                const dataType = miniChartType[nodeId] || 'temp';
+                const readings = miniChartData[nodeId];
+
+                // Get data based on type
                 const chartData = readings.map(r => ({
                     x: new Date(r.timestamp),
-                    y: r.temperature
+                    y: dataType === 'temp' ? r.temperature :
+                       dataType === 'humidity' ? r.humidity : r.pressure
                 }));
+
+                // Update label
+                const labels = {
+                    'temp': '🌡️ Temp (6hr)',
+                    'humidity': '💧 Humidity (6hr)',
+                    'pressure': '🔽 Pressure (6hr)'
+                };
+                const labelEl = document.getElementById(`mini-chart-label-${nodeId}`);
+                if (labelEl) {
+                    labelEl.textContent = labels[dataType] + ' - click to change';
+                }
 
                 miniCharts[nodeId] = new Chart(ctx, {
                     type: 'line',

@@ -709,7 +709,7 @@
             'NODE_02': { lat: 50.2665, lng: -5.0520, name: 'Outdoor LoRa 2' },
             'NODE_WIFI': { lat: 50.2670, lng: -5.0515, name: 'Solar WiFi Node' },
             'NODE_INDOORS': { lat: 50.2655, lng: -5.0530, name: 'Indoor Base Station' },
-            'NODE_SOIL_01': { lat: 50.2658, lng: -5.0522, name: 'Soil Moisture Sensor' }
+            'NODE_SOIL_01': { lat: 50.2658, lng: -5.0522, name: 'Aloe Vera 🪴' }
         };
 
         let map, heatLayer, tempChart;
@@ -1127,18 +1127,25 @@
                 }
 
                 // Soil moisture alerts (for soil nodes)
+                // Aloe Vera is a succulent - prefers dry soil, sensitive to overwatering
                 if (node.soil_moisture !== undefined && node.soil_moisture > 0) {
-                    if (node.soil_moisture < 20) {
-                        alerts.now.push({
-                            icon: '🏜️',
-                            title: 'SOIL VERY DRY',
-                            text: `${node.node_id}: ${node.soil_moisture.toFixed(0)}% moisture - Water immediately!`
-                        });
-                    } else if (node.soil_moisture < 30) {
+                    if (node.soil_moisture < 10) {
                         alerts.soon.push({
-                            icon: '🌱',
-                            title: 'Soil Dry',
-                            text: `${node.node_id}: ${node.soil_moisture.toFixed(0)}% moisture - Consider watering.`
+                            icon: '🪴',
+                            title: 'Aloe Needs Water',
+                            text: `${node.node_id}: ${node.soil_moisture.toFixed(0)}% moisture - Time to water your Aloe Vera.`
+                        });
+                    } else if (node.soil_moisture > 60) {
+                        alerts.now.push({
+                            icon: '💧',
+                            title: 'SOIL TOO WET',
+                            text: `${node.node_id}: ${node.soil_moisture.toFixed(0)}% moisture - Aloe Vera at risk of root rot!`
+                        });
+                    } else if (node.soil_moisture > 45) {
+                        alerts.soon.push({
+                            icon: '💧',
+                            title: 'Soil Wet',
+                            text: `${node.node_id}: ${node.soil_moisture.toFixed(0)}% moisture - Hold off watering, Aloe prefers dry.`
                         });
                     }
                 }

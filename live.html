@@ -656,12 +656,28 @@
 
         <!-- Charts -->
         <div class="chart-container">
-            <div class="chart-title">📊 Temperature & Dewpoint History (24 Hours)</div>
+            <div class="chart-title" id="chart-title">📊 Temperature & Dewpoint History</div>
             <div class="time-selector">
                 <button class="time-btn" onclick="updateCharts('1h')">1 Hour</button>
                 <button class="time-btn" onclick="updateCharts('6h')">6 Hours</button>
                 <button class="time-btn active" onclick="updateCharts('24h')">24 Hours</button>
+                <button class="time-btn" onclick="updateCharts('3d')">3 Days</button>
+                <button class="time-btn" onclick="updateCharts('7d')">7 Days</button>
                 <button class="time-btn" onclick="resetChartZoom()" style="margin-left: 10px; background: #f59e0b; border-color: #f59e0b; color: white;">🔍 Reset Zoom</button>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #666; font-size: 14px; margin-bottom: 8px; font-weight: 500;">📈 Data Type:</label>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 10px;">
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="radio" name="dataType" value="temperature" checked onchange="updateCharts(currentTimeRange)"> 🌡️ Temperature
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="radio" name="dataType" value="humidity" onchange="updateCharts(currentTimeRange)"> 💧 Humidity
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="radio" name="dataType" value="pressure" onchange="updateCharts(currentTimeRange)"> 🔽 Pressure
+                    </label>
+                </div>
             </div>
             <div style="margin-bottom: 15px;">
                 <label style="display: block; color: #666; font-size: 14px; margin-bottom: 8px; font-weight: 500;">📍 Show Nodes:</label>
@@ -1192,14 +1208,16 @@
             const nodeColors = {
                 'NODE_01': '#f59e0b',
                 'NODE_02': '#3b82f6',
-                'NODE_INDOORS': '#06b6d4',
                 'NODE_WIFI': '#10b981'
             };
+
+            // Only show these nodes in the chart selector
+            const allowedNodes = ['NODE_01', 'NODE_02', 'NODE_WIFI'];
 
             // Default checked nodes
             const defaultChecked = ['NODE_01', 'NODE_02'];
 
-            currentNodes.forEach(node => {
+            currentNodes.filter(node => allowedNodes.includes(node.node_id)).forEach(node => {
                 const checkbox = document.createElement('label');
                 checkbox.style.cssText = 'display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px; color: #333;';
 
@@ -1240,8 +1258,20 @@
                 event.target.classList.add('active');
             }
 
+            // Get selected data type
+            const dataTypeRadio = document.querySelector('input[name="dataType"]:checked');
+            const dataType = dataTypeRadio ? dataTypeRadio.value : 'temperature';
+
+            // Update chart title
+            const titles = {
+                'temperature': '📊 Temperature & Dewpoint History',
+                'humidity': '📊 Humidity History',
+                'pressure': '📊 Pressure History'
+            };
+            document.getElementById('chart-title').textContent = titles[dataType] || titles['temperature'];
+
             try {
-                const hours = timeRange === '1h' ? 1 : timeRange === '6h' ? 6 : 24;
+                const hours = timeRange === '1h' ? 1 : timeRange === '6h' ? 6 : timeRange === '3d' ? 72 : timeRange === '7d' ? 168 : 24;
                 const response = await fetch(`${HISTORY_API_URL}?hours=${hours}`);
                 const data = await response.json();
 
@@ -1258,7 +1288,7 @@
 
                 if (tempChart) tempChart.destroy();
 
-                // Organize data by node with dewpoint calculation
+                // Organize data by node
                 const nodeData = {};
                 data.readings.forEach(reading => {
                     if (!selectedNodes.includes(reading.node_id)) return;
@@ -1267,7 +1297,9 @@
                         nodeData[reading.node_id] = {
                             timestamps: [],
                             temperatures: [],
-                            dewpoints: []
+                            dewpoints: [],
+                            humidity: [],
+                            pressure: []
                         };
                     }
 
@@ -1276,50 +1308,81 @@
                     nodeData[reading.node_id].timestamps.push(new Date(reading.timestamp));
                     nodeData[reading.node_id].temperatures.push(reading.temperature);
                     nodeData[reading.node_id].dewpoints.push(dewpoint);
+                    nodeData[reading.node_id].humidity.push(reading.humidity);
+                    nodeData[reading.node_id].pressure.push(reading.pressure);
                 });
 
                 const datasets = [];
                 const nodeColors = {
                     'NODE_01': '#f59e0b',
                     'NODE_02': '#3b82f6',
-                    'NODE_INDOORS': '#06b6d4',
                     'NODE_WIFI': '#10b981'
                 };
 
-                // Create datasets for each selected node (temperature + dewpoint)
+                // Create datasets based on selected data type
                 Object.keys(nodeData).forEach(nodeId => {
                     const color = nodeColors[nodeId] || '#999';
 
-                    // Temperature line (solid)
-                    datasets.push({
-                        label: `${nodeId} Temp`,
-                        data: nodeData[nodeId].timestamps.map((t, i) => ({
-                            x: t,
-                            y: nodeData[nodeId].temperatures[i]
-                        })),
-                        borderColor: color,
-                        backgroundColor: color + '33',
-                        tension: 0.4,
-                        fill: false,
-                        borderWidth: 2,
-                        pointRadius: 1
-                    });
+                    if (dataType === 'temperature') {
+                        // Temperature line (solid)
+                        datasets.push({
+                            label: `${nodeId} Temp`,
+                            data: nodeData[nodeId].timestamps.map((t, i) => ({
+                                x: t,
+                                y: nodeData[nodeId].temperatures[i]
+                            })),
+                            borderColor: color,
+                            backgroundColor: color + '33',
+                            tension: 0.4,
+                            fill: false,
+                            borderWidth: 2,
+                            pointRadius: hours > 24 ? 0 : 1
+                        });
 
-                    // Dewpoint line (dashed)
-                    datasets.push({
-                        label: `${nodeId} Dewpoint`,
-                        data: nodeData[nodeId].timestamps.map((t, i) => ({
-                            x: t,
-                            y: nodeData[nodeId].dewpoints[i]
-                        })),
-                        borderColor: color,
-                        backgroundColor: 'transparent',
-                        tension: 0.4,
-                        fill: false,
-                        borderWidth: 2,
-                        borderDash: [5, 5],
-                        pointRadius: 1
-                    });
+                        // Dewpoint line (dashed)
+                        datasets.push({
+                            label: `${nodeId} Dewpoint`,
+                            data: nodeData[nodeId].timestamps.map((t, i) => ({
+                                x: t,
+                                y: nodeData[nodeId].dewpoints[i]
+                            })),
+                            borderColor: color,
+                            backgroundColor: 'transparent',
+                            tension: 0.4,
+                            fill: false,
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: hours > 24 ? 0 : 1
+                        });
+                    } else if (dataType === 'humidity') {
+                        datasets.push({
+                            label: `${nodeId} Humidity`,
+                            data: nodeData[nodeId].timestamps.map((t, i) => ({
+                                x: t,
+                                y: nodeData[nodeId].humidity[i]
+                            })),
+                            borderColor: color,
+                            backgroundColor: color + '33',
+                            tension: 0.4,
+                            fill: false,
+                            borderWidth: 2,
+                            pointRadius: hours > 24 ? 0 : 1
+                        });
+                    } else if (dataType === 'pressure') {
+                        datasets.push({
+                            label: `${nodeId} Pressure`,
+                            data: nodeData[nodeId].timestamps.map((t, i) => ({
+                                x: t,
+                                y: nodeData[nodeId].pressure[i]
+                            })),
+                            borderColor: color,
+                            backgroundColor: color + '33',
+                            tension: 0.4,
+                            fill: false,
+                            borderWidth: 2,
+                            pointRadius: hours > 24 ? 0 : 1
+                        });
+                    }
                 });
 
                 tempChart = new Chart(ctx, {
@@ -1336,10 +1399,14 @@
                         scales: {
                             x: {
                                 type: 'time',
-                                time: { unit: hours === 1 ? 'minute' : 'hour' }
+                                time: { unit: hours <= 1 ? 'minute' : hours <= 24 ? 'hour' : 'day' }
                             },
                             y: {
-                                title: { display: true, text: 'Temperature (°C)' }
+                                title: {
+                                    display: true,
+                                    text: dataType === 'temperature' ? 'Temperature (°C)' :
+                                          dataType === 'humidity' ? 'Humidity (%)' : 'Pressure (hPa)'
+                                }
                             }
                         },
                         plugins: {
@@ -1350,7 +1417,9 @@
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '°C';
+                                        const unit = dataType === 'temperature' ? '°C' :
+                                                     dataType === 'humidity' ? '%' : ' hPa';
+                                        return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + unit;
                                     }
                                 }
                             },
@@ -1383,12 +1452,24 @@
         }
 
         // Node Cards
+        // Store mini chart instances
+        const miniCharts = {};
+
         function updateNodes(nodes) {
             const container = document.getElementById('nodes-container');
             container.innerHTML = '';
 
-            nodes.forEach(node => {
+            // Only show main nodes
+            const displayNodes = ['NODE_01', 'NODE_02', 'NODE_WIFI'];
+
+            nodes.filter(n => displayNodes.includes(n.node_id)).forEach(node => {
                 const isActive = node.seconds_since_update < INACTIVE_THRESHOLD;
+                const nodeColors = {
+                    'NODE_01': '#f59e0b',
+                    'NODE_02': '#3b82f6',
+                    'NODE_WIFI': '#10b981'
+                };
+                const color = nodeColors[node.node_id] || '#999';
 
                 const card = document.createElement('div');
                 card.className = 'node-card';
@@ -1417,10 +1498,71 @@
                         <span class="reading-value">${node.battery_voltage.toFixed(2)}V (${node.battery_percent}%)</span>
                     </div>
                     ` : ''}
+                    <div class="mini-chart-container" style="margin-top: 10px; height: 60px;">
+                        <canvas id="mini-chart-${node.node_id}"></canvas>
+                    </div>
                     <div class="timestamp">Last updated: ${node.last_update}</div>
                 `;
                 container.appendChild(card);
+
+                // Create mini chart after card is added to DOM
+                setTimeout(() => createMiniChart(node.node_id, color), 100);
             });
+        }
+
+        // Create mini sparkline chart for a node
+        async function createMiniChart(nodeId, color) {
+            try {
+                const response = await fetch(`${HISTORY_API_URL}?hours=6&node_id=${nodeId}`);
+                const data = await response.json();
+
+                const canvas = document.getElementById(`mini-chart-${nodeId}`);
+                if (!canvas) return;
+
+                const ctx = canvas.getContext('2d');
+
+                // Destroy existing chart if any
+                if (miniCharts[nodeId]) {
+                    miniCharts[nodeId].destroy();
+                }
+
+                const readings = data.readings.filter(r => r.node_id === nodeId);
+                const chartData = readings.map(r => ({
+                    x: new Date(r.timestamp),
+                    y: r.temperature
+                }));
+
+                miniCharts[nodeId] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            data: chartData,
+                            borderColor: color,
+                            backgroundColor: color + '33',
+                            tension: 0.4,
+                            fill: true,
+                            borderWidth: 2,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false }
+                        },
+                        scales: {
+                            x: { display: false, type: 'time' },
+                            y: { display: false }
+                        },
+                        interaction: { enabled: false },
+                        animation: { duration: 0 }
+                    }
+                });
+            } catch (error) {
+                console.error(`Error creating mini chart for ${nodeId}:`, error);
+            }
         }
 
         // Main update function

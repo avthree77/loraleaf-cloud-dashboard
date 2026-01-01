@@ -1142,8 +1142,9 @@
                 }
             });
 
-            // Offline nodes
-            inactiveNodes.forEach(node => {
+            // Offline nodes - only alert for core outdoor nodes
+            const coreNodes = ['NODE_01', 'NODE_02', 'NODE_WIFI'];
+            inactiveNodes.filter(n => coreNodes.includes(n.node_id)).forEach(node => {
                 alerts.now.push({
                     icon: '📡',
                     title: 'NODE OFFLINE',

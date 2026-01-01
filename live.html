@@ -1609,6 +1609,13 @@
                     labelEl.textContent = labels[dataType] + ' - click to change';
                 }
 
+                // Create point radius array: small dots with larger dot at end
+                const pointRadii = chartData.map((_, i) => {
+                    if (i === chartData.length - 1) return 4;  // Last point larger
+                    if (i % Math.ceil(chartData.length / 6) === 0) return 2;  // ~6 points spread
+                    return 0;
+                });
+
                 miniCharts[nodeId] = new Chart(ctx, {
                     type: 'line',
                     data: {
@@ -1619,7 +1626,10 @@
                             tension: 0.4,
                             fill: true,
                             borderWidth: 2,
-                            pointRadius: 0
+                            pointRadius: pointRadii,
+                            pointBackgroundColor: color,
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 1
                         }]
                     },
                     options: {

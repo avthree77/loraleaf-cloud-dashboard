@@ -1126,6 +1126,23 @@
                     });
                 }
 
+                // Soil moisture alerts (for soil nodes)
+                if (node.soil_moisture !== undefined && node.soil_moisture > 0) {
+                    if (node.soil_moisture < 20) {
+                        alerts.now.push({
+                            icon: '🏜️',
+                            title: 'SOIL VERY DRY',
+                            text: `${node.node_id}: ${node.soil_moisture.toFixed(0)}% moisture - Water immediately!`
+                        });
+                    } else if (node.soil_moisture < 30) {
+                        alerts.soon.push({
+                            icon: '🌱',
+                            title: 'Soil Dry',
+                            text: `${node.node_id}: ${node.soil_moisture.toFixed(0)}% moisture - Consider watering.`
+                        });
+                    }
+                }
+
                 // Battery alerts
                 if (node.battery_voltage && node.battery_voltage < 3.3) {
                     alerts.now.push({

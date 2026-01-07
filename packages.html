@@ -415,28 +415,48 @@
 
         <!-- SECTION 1: The Hub (Required) -->
         <section class="section">
-            <div class="required-item">
-                <span class="required-badge">⭐ REQUIRED</span>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
-                    <div>
-                        <h2 style="color: white; text-align: left; margin-bottom: 20px;">LoRaLeaf Hub</h2>
-                        <div style="font-size: 3.5em; font-weight: bold; margin-bottom: 20px;">£199</div>
-                        <p style="font-size: 1.1em; line-height: 1.6; margin-bottom: 20px; color: #fbbf24;">
-                            The brain of your system - required for all setups
-                        </p>
-                        <ul class="hardware-features" style="color: white;">
-                            <li style="color: white;">Raspberry Pi 4 with 7" touchscreen display</li>
-                            <li style="color: white;">Built-in LoRa receiver (10km range)</li>
-                            <li style="color: white;">Indoor temperature, humidity & pressure sensor (BME280)</li>
-                            <li style="color: white;">Uploads to Azure cloud - access your data anywhere</li>
-                            <li style="color: white;">Local display shows all readings at a glance</li>
-                            <li style="color: white;">Power supply included</li>
-                        </ul>
-                    </div>
-                    <div style="text-align: center;">
-                        <a href="mailto:info@loraleaf.com?subject=LoRaLeaf Hub Enquiry" class="cta-white">Enquire Now</a>
-                    </div>
+            <h2>🏠 LoRaLeaf Hub</h2>
+            <p class="section-subtitle">The brain of your system - required for all setups. Choose WiFi-only or add LoRa for long-range nodes.</p>
+
+            <div class="hardware-grid" style="max-width: 900px; margin: 0 auto;">
+                <!-- Hub WiFi Only -->
+                <div class="hardware-card">
+                    <div class="hardware-tagline">"WiFi Nodes Only"</div>
+                    <div class="hardware-name">Hub (WiFi)</div>
+                    <div class="hardware-price">£199</div>
+                    <ul class="hardware-features">
+                        <li>Raspberry Pi 4 with 7" touchscreen display</li>
+                        <li>Indoor temperature, humidity & pressure sensor (BME280)</li>
+                        <li>Uploads to Azure cloud - access your data anywhere</li>
+                        <li>Local display shows all readings at a glance</li>
+                        <li>Power supply included</li>
+                    </ul>
+                    <div class="best-for">Best for: WiFi nodes within router range</div>
+                    <a href="mailto:info@loraleaf.com?subject=LoRaLeaf Hub (WiFi) Enquiry" class="cta-button">Enquire Now</a>
                 </div>
+
+                <!-- Hub + LoRa Gateway -->
+                <div class="hardware-card featured">
+                    <span class="badge">Recommended</span>
+                    <div class="hardware-tagline">"WiFi + Long Range"</div>
+                    <div class="hardware-name">Hub + LoRa Gateway</div>
+                    <div class="hardware-price">£229</div>
+                    <ul class="hardware-features">
+                        <li>Everything in WiFi Hub, plus:</li>
+                        <li>Built-in LoRa receiver (up to 10km range)</li>
+                        <li>Connect both WiFi and LoRa nodes</li>
+                        <li>Future-proof your system</li>
+                    </ul>
+                    <div class="best-for">Best for: Large sites, fields, outbuildings</div>
+                    <a href="mailto:info@loraleaf.com?subject=LoRaLeaf Hub + LoRa Gateway Enquiry" class="cta-button">Enquire Now</a>
+                </div>
+            </div>
+
+            <!-- LoRa Gateway Add-on -->
+            <div class="info-box" style="max-width: 900px; margin: 30px auto;">
+                <strong>Already have a WiFi Hub?</strong> Add LoRa capability with our <strong>LoRa Gateway Add-on - £39</strong>.
+                Simple USB plug-in upgrade.
+                <a href="mailto:info@loraleaf.com?subject=LoRa Gateway Add-on Enquiry" style="margin-left: 10px;">Enquire →</a>
             </div>
         </section>
 
@@ -478,10 +498,10 @@
                 <div class="kit-card popular">
                     <div class="popular-badge">⭐ MOST POPULAR</div>
                     <div class="hardware-name">Estate Starter</div>
-                    <div class="hardware-price">£499</div>
+                    <div class="hardware-price">£529</div>
                     <div class="savings">Save £87</div>
                     <ul class="hardware-features">
-                        <li>1× LoRaLeaf Hub</li>
+                        <li>1× Hub + LoRa Gateway</li>
                         <li>3× LoRa Nodes</li>
                         <li>Free Basic subscription included</li>
                     </ul>
@@ -492,10 +512,10 @@
                 <!-- Estate Pro -->
                 <div class="kit-card">
                     <div class="hardware-name">Estate Pro</div>
-                    <div class="hardware-price">£749</div>
+                    <div class="hardware-price">£779</div>
                     <div class="savings">Save £95</div>
                     <ul class="hardware-features">
-                        <li>1× LoRaLeaf Hub</li>
+                        <li>1× Hub + LoRa Gateway</li>
                         <li>5× LoRa Nodes</li>
                         <li>Free Basic subscription included</li>
                     </ul>
@@ -506,10 +526,10 @@
                 <!-- Research Kit -->
                 <div class="kit-card">
                     <div class="hardware-name">Research Kit</div>
-                    <div class="hardware-price">£1,299</div>
-                    <div class="savings">Save £190</div>
+                    <div class="hardware-price">£1,349</div>
+                    <div class="savings">Save £170</div>
                     <ul class="hardware-features">
-                        <li>1× LoRaLeaf Hub</li>
+                        <li>1× Hub + LoRa Gateway</li>
                         <li>10× LoRa Nodes</li>
                         <li>Free Basic subscription included</li>
                     </ul>
@@ -583,6 +603,22 @@
                     <a href="mailto:info@loraleaf.com?subject=LoRa+Soil Node Enquiry" class="cta-button">Enquire Now</a>
                 </div>
 
+                <!-- LoRa + GPS -->
+                <div class="hardware-card">
+                    <span class="badge">New</span>
+                    <div class="hardware-tagline">"Tracker"</div>
+                    <div class="hardware-name">LoRa Node + GPS</div>
+                    <div class="hardware-price">£169</div>
+                    <ul class="hardware-features">
+                        <li>Everything in LoRa Node, plus:</li>
+                        <li>GPS location tracking</li>
+                        <li>Perfect for mobile assets</li>
+                        <li>Range testing and mapping</li>
+                    </ul>
+                    <div class="best-for">Best for: Asset tracking, livestock, range testing</div>
+                    <a href="mailto:info@loraleaf.com?subject=LoRa+GPS Node Enquiry" class="cta-button">Enquire Now</a>
+                </div>
+
                 <!-- LoRa Weather Station -->
                 <div class="hardware-card">
                     <span class="badge">Coming Soon</span>
@@ -598,6 +634,23 @@
                     <div class="best-for">Best for: Estates, farms, serious weather monitoring</div>
                     <a href="mailto:info@loraleaf.com?subject=Weather Station Enquiry" class="cta-button secondary">Register Interest</a>
                 </div>
+
+                <!-- Meshtastic Node -->
+                <div class="hardware-card">
+                    <span class="badge">New</span>
+                    <div class="hardware-tagline">"Off-Grid Comms"</div>
+                    <div class="hardware-name">Meshtastic Node</div>
+                    <div class="hardware-price">£169</div>
+                    <ul class="hardware-features">
+                        <li>Heltec V3 with GPS & BME280</li>
+                        <li>Solar powered with weatherproof enclosure</li>
+                        <li>Join the UK-wide Meshtastic mesh network</li>
+                        <li>Off-grid text messaging - no SIM needed</li>
+                        <li>Includes antenna and mounting kit</li>
+                    </ul>
+                    <div class="best-for">Best for: Remote comms, hiking, off-grid locations</div>
+                    <a href="mailto:info@loraleaf.com?subject=Meshtastic Node Enquiry" class="cta-button">Enquire Now</a>
+                </div>
             </div>
         </section>
 
@@ -605,8 +658,8 @@
         <div class="build-your-own">
             <h3>🔧 Build Your Own Configuration</h3>
             <p style="font-size: 1.1em; color: #666; max-width: 800px; margin: 20px auto;">
-                Need a custom configuration? Start with a Hub (£199), add WiFi Nodes (£79 each) or LoRa Nodes (£129 each),
-                plus any specialist sensors you need.
+                Need a custom configuration? Start with a WiFi Hub (£199) or Hub + LoRa Gateway (£229),
+                add WiFi Nodes (£79 each) or LoRa Nodes (£129 each), plus any specialist sensors you need.
             </p>
             <a href="mailto:info@loraleaf.com?subject=Custom Configuration Enquiry" class="cta-button" style="max-width: 300px; margin: 20px auto;">Contact Us</a>
         </div>
